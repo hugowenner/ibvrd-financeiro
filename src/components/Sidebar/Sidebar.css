@@ -1,0 +1,5 @@
+/* Estilo para o link ativo na Sidebar */
+a.active {
+    background-color: #1e4a7a; /* Um azul um pouco mais claro que o fundo */
+    font-weight: bold;
+}
