@@ -26,7 +26,7 @@ const FinanceForm = () => {
         try {
             await addLancamento({ ...formData, valor: parseFloat(formData.valor) });
             alert('Lançamento adicionado com sucesso!');
-            setFormData({ // Limpa o formulário
+            setFormData({
                 tipo: 'Entrada', categoria: 'Dízimo', descricao: '', valor: '', data: new Date().toISOString().split('T')[0], formaPagamento: 'Pix', observacoes: ''
             });
         } catch (error) {
@@ -37,18 +37,23 @@ const FinanceForm = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 shadow-sm p-8 rounded-lg space-y-6">
+            <div className="border-b border-gray-100 pb-4 mb-4">
+                <h3 className="text-xl font-serif text-gray-900 font-medium">Novo Lançamento</h3>
+                <div className="w-12 h-0.5 bg-amber-600 mt-2"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Tipo</label>
-                    <select name="tipo" value={formData.tipo} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-ibvrd focus:border-azul-ibvrd sm:text-sm">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipo</label>
+                    <select name="tipo" value={formData.tipo} onChange={handleChange} className="block w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-600 focus:border-amber-600 transition duration-200">
                         <option value="Entrada">Entrada</option>
                         <option value="Saída">Saída</option>
                     </select>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Categoria</label>
-                    <select name="categoria" value={formData.categoria} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-ibvrd focus:border-azul-ibvrd sm:text-sm">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categoria</label>
+                    <select name="categoria" value={formData.categoria} onChange={handleChange} className="block w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-600 focus:border-amber-600 transition duration-200">
                         <option value="Dízimo">Dízimo</option>
                         <option value="Oferta">Oferta</option>
                         <option value="Doação">Doação</option>
@@ -59,22 +64,22 @@ const FinanceForm = () => {
                 </div>
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700">Descrição</label>
-                <input type="text" name="descricao" value={formData.descricao} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-ibvrd focus:border-azul-ibvrd sm:text-sm" />
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descrição</label>
+                <input type="text" name="descricao" value={formData.descricao} onChange={handleChange} required className="block w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-600 focus:border-amber-600 transition duration-200" placeholder="Ex: Dízimo de Janeiro" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Valor (R$)</label>
-                    <input type="number" name="valor" value={formData.valor} onChange={handleChange} step="0.01" min="0.01" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-ibvrd focus:border-azul-ibvrd sm:text-sm" />
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Valor (R$)</label>
+                    <input type="number" name="valor" value={formData.valor} onChange={handleChange} step="0.01" min="0.01" required className="block w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-600 focus:border-amber-600 transition duration-200 font-mono" />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Data</label>
-                    <input type="date" name="data" value={formData.data} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-ibvrd focus:border-azul-ibvrd sm:text-sm" />
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data</label>
+                    <input type="date" name="data" value={formData.data} onChange={handleChange} required className="block w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-600 focus:border-amber-600 transition duration-200" />
                 </div>
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700">Forma de Pagamento</label>
-                <select name="formaPagamento" value={formData.formaPagamento} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-ibvrd focus:border-azul-ibvrd sm:text-sm">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Forma de Pagamento</label>
+                <select name="formaPagamento" value={formData.formaPagamento} onChange={handleChange} className="block w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-600 focus:border-amber-600 transition duration-200">
                     <option value="Dinheiro">Dinheiro</option>
                     <option value="Pix">Pix</option>
                     <option value="Transferência">Transferência</option>
@@ -82,10 +87,10 @@ const FinanceForm = () => {
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700">Observações</label>
-                <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows="2" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-ibvrd focus:border-azul-ibvrd sm:text-sm"></textarea>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Observações</label>
+                <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} rows="2" className="block w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-600 focus:border-amber-600 transition duration-200 resize-none"></textarea>
             </div>
-            <button type="submit" disabled={isSubmitting} className="w-full bg-azul-ibvrd text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-gray-400">
+            <button type="submit" disabled={isSubmitting} className="w-full bg-amber-600 text-white font-bold uppercase tracking-widest text-sm py-3 px-4 rounded-md hover:bg-amber-700 transition duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow">
                 {isSubmitting ? 'Adicionando...' : 'Adicionar Lançamento'}
             </button>
         </form>

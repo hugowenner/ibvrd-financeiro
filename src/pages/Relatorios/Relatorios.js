@@ -43,54 +43,67 @@ const Relatorios = () => {
     }, [lancamentos]);
 
     if (loading) {
-        return <div>Carregando...</div>;
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Relatórios Financeiros</h2>
+        <div className="animate-fade-in">
+            <div className="mb-10 pb-4 border-b border-gray-200">
+                <h2 className="text-3xl font-serif text-gray-900 font-normal">Relatórios Financeiros</h2>
+                <p className="text-gray-500 mt-2 font-light">Análise detalhada por período e categoria.</p>
+            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <Card title="Resumo Mensal" className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                        <thead className="text-left border-b">
-                            <tr>
-                                <th className="pb-2 font-semibold text-gray-700">Mês</th>
-                                <th className="pb-2 font-semibold text-positivo text-right">Entradas</th>
-                                <th className="pb-2 font-semibold text-negativo text-right">Saídas</th>
-                                <th className="pb-2 font-semibold text-gray-800 text-right">Saldo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {relatorioMensal.map((rel, index) => (
-                                <tr key={index} className="border-b">
-                                    <td className="py-2">{rel.mes}</td>
-                                    <td className="py-2 text-right text-positivo">{formatCurrency(rel.entradas)}</td>
-                                    <td className="py-2 text-right text-negativo">{formatCurrency(rel.saidas)}</td>
-                                    <td className={`py-2 text-right font-semibold ${rel.saldo >= 0 ? 'text-positivo' : 'text-negativo'}`}>{formatCurrency(rel.saldo)}</td>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Card Resumo Mensal */}
+                <Card title="Resumo Mensal" className="border-t-4 border-t-amber-600">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-gray-400 uppercase bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th className="px-4 py-3 font-bold tracking-wider">Mês</th>
+                                    <th className="px-4 py-3 font-bold tracking-wider text-right">Entradas</th>
+                                    <th className="px-4 py-3 font-bold tracking-wider text-right">Saídas</th>
+                                    <th className="px-4 py-3 font-bold tracking-wider text-right">Saldo</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {relatorioMensal.map((rel, index) => (
+                                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-gray-700 capitalize">{rel.mes}</td>
+                                        <td className="px-4 py-3 text-right text-green-700 font-mono">{formatCurrency(rel.entradas)}</td>
+                                        <td className="px-4 py-3 text-right text-red-700 font-mono">{formatCurrency(rel.saidas)}</td>
+                                        <td className={`px-4 py-3 text-right font-bold font-serif ${rel.saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>{formatCurrency(rel.saldo)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </Card>
 
-                <Card title="Total por Categoria" className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                        <thead className="text-left border-b">
-                            <tr>
-                                <th className="pb-2 font-semibold text-gray-700">Categoria</th>
-                                <th className="pb-2 font-semibold text-gray-800 text-right">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {relatorioPorCategoria.map((rel, index) => (
-                                <tr key={index} className="border-b">
-                                    <td className="py-2">{rel.categoria}</td>
-                                    <td className="py-2 text-right font-semibold">{formatCurrency(rel.total)}</td>
+                {/* Card Total por Categoria */}
+                <Card title="Total por Categoria" className="border-t-4 border-t-amber-600">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-gray-400 uppercase bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th className="px-4 py-3 font-bold tracking-wider">Categoria</th>
+                                    <th className="px-4 py-3 font-bold tracking-wider text-right">Total</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {relatorioPorCategoria.map((rel, index) => (
+                                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-gray-700">{rel.categoria}</td>
+                                        <td className="px-4 py-3 text-right font-bold text-gray-900 font-mono">{formatCurrency(rel.total)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </Card>
             </div>
         </div>

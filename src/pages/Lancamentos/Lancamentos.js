@@ -42,32 +42,45 @@ const Lancamentos = () => {
     };
 
     if (loading) {
-        return <div>Carregando...</div>;
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Lançamentos Financeiros</h2>
+        <div className="animate-fade-in">
+            <div className="mb-10 pb-4 border-b border-gray-200">
+                <h2 className="text-3xl font-serif text-gray-900 font-normal">Lançamentos Financeiros</h2>
+                <p className="text-gray-500 mt-2 font-light">Gestão detalhada de entradas e saídas.</p>
+            </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Coluna do Formulário */}
+                <div className="lg:col-span-4 space-y-6">
                     <FinanceForm />
                 </div>
-                <div className="lg:col-span-2">
+
+                {/* Coluna da Lista e Filtros */}
+                <div className="lg:col-span-8 space-y-6">
                     <Filters filters={filters} onFilterChange={handleFilterChange} />
                     
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="bg-white p-4 rounded shadow text-center">
-                            <p className="text-xs text-gray-500 uppercase">Entradas</p>
-                            <p className="text-lg font-bold text-positivo">{formatCurrency(totalFiltrado.totalEntradas)}</p>
+                    {/* Mini Cards de Resumo */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-white border border-gray-200 shadow-sm p-4 rounded-lg flex flex-col justify-center items-center">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Entradas</span>
+                            <span className="text-xl font-bold text-green-700 font-serif mt-1">{formatCurrency(totalFiltrado.totalEntradas)}</span>
                         </div>
-                        <div className="bg-white p-4 rounded shadow text-center">
-                            <p className="text-xs text-gray-500 uppercase">Saídas</p>
-                            <p className="text-lg font-bold text-negativo">{formatCurrency(totalFiltrado.totalSaidas)}</p>
+                        <div className="bg-white border border-gray-200 shadow-sm p-4 rounded-lg flex flex-col justify-center items-center">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Saídas</span>
+                            <span className="text-xl font-bold text-red-700 font-serif mt-1">{formatCurrency(totalFiltrado.totalSaidas)}</span>
                         </div>
-                        <div className="bg-white p-4 rounded shadow text-center">
-                            <p className="text-xs text-gray-500 uppercase">Saldo</p>
-                            <p className={`text-lg font-bold ${totalFiltrado.saldo >= 0 ? 'text-positivo' : 'text-negativo'}`}>{formatCurrency(totalFiltrado.saldo)}</p>
+                        <div className="bg-white border border-gray-200 shadow-sm p-4 rounded-lg flex flex-col justify-center items-center">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Saldo</span>
+                            <span className={`text-xl font-bold font-serif mt-1 ${totalFiltrado.saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                {formatCurrency(totalFiltrado.saldo)}
+                            </span>
                         </div>
                     </div>
 
