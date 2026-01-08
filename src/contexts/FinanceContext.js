@@ -6,6 +6,8 @@ export const FinanceContext = createContext();
 export const FinanceProvider = ({ children }) => {
     const [lancamentos, setLancamentos] = useState([]);
     const [loading, setLoading] = useState(true);
+    // Novo estado para notificações visuais (Toast)
+    const [notification, setNotification] = useState(null);
 
     useEffect(() => {
         const fetchLancamentos = async () => {
@@ -32,8 +34,14 @@ export const FinanceProvider = ({ children }) => {
         }
     };
 
+    // Função auxiliar para disparar notificações
+    const notify = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 4000);
+    };
+
     return (
-        <FinanceContext.Provider value={{ lancamentos, loading, addLancamento }}>
+        <FinanceContext.Provider value={{ lancamentos, loading, addLancamento, notification, notify }}>
             {children}
         </FinanceContext.Provider>
     );

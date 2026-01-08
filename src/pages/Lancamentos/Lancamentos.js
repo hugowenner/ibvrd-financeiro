@@ -1,8 +1,9 @@
+// src/pages/Lancamentos.js
 import React, { useContext, useState, useMemo } from 'react';
 import { FinanceContext } from '../../contexts/FinanceContext';
-import FinanceForm from '../../components/FinanceForm/FinanceForm';
-import Filters from '../../components/Filters/Filters';
-import Table from '../../components/Table/Table';
+import FinanceForm from '../../components/FinanceForm';
+import Filters from '../../components/Filters';
+import Table from '../../components/Table';
 import { formatCurrency } from '../../utils/formatters';
 
 const Lancamentos = () => {
@@ -51,34 +52,34 @@ const Lancamentos = () => {
 
     return (
         <div className="animate-fade-in">
-            <div className="mb-10 pb-4 border-b border-gray-200">
-                <h2 className="text-3xl font-serif text-gray-900 font-normal">Lançamentos Financeiros</h2>
-                <p className="text-gray-500 mt-2 font-light">Gestão detalhada de entradas e saídas.</p>
+            <div className="mb-6 md:mb-8 pb-4 border-b border-gray-100">
+                <h2 className="text-2xl md:text-3xl font-serif text-gray-900 font-semibold">Lançamentos Financeiros</h2>
+                <p className="text-gray-500 mt-2 font-sans font-light text-sm md:text-lg">Gestão detalhada de entradas e saídas.</p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
                 {/* Coluna do Formulário */}
-                <div className="lg:col-span-4 space-y-6">
+                <div className="lg:col-span-4 space-y-6 order-2 lg:order-1">
                     <FinanceForm />
                 </div>
 
                 {/* Coluna da Lista e Filtros */}
-                <div className="lg:col-span-8 space-y-6">
+                <div className="lg:col-span-8 space-y-6 order-1 lg:order-2">
                     <Filters filters={filters} onFilterChange={handleFilterChange} />
                     
                     {/* Mini Cards de Resumo */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white border border-gray-200 shadow-sm p-4 rounded-lg flex flex-col justify-center items-center">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Entradas</span>
-                            <span className="text-xl font-bold text-green-700 font-serif mt-1">{formatCurrency(totalFiltrado.totalEntradas)}</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                        <div className="bg-white border border-gray-100 shadow-sm p-4 md:p-5 rounded-2xl flex flex-col justify-center items-center text-center">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Entradas</span>
+                            <span className="text-lg md:text-xl font-bold text-green-700 font-serif">{formatCurrency(totalFiltrado.totalEntradas)}</span>
                         </div>
-                        <div className="bg-white border border-gray-200 shadow-sm p-4 rounded-lg flex flex-col justify-center items-center">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Saídas</span>
-                            <span className="text-xl font-bold text-red-700 font-serif mt-1">{formatCurrency(totalFiltrado.totalSaidas)}</span>
+                        <div className="bg-white border border-gray-100 shadow-sm p-4 md:p-5 rounded-2xl flex flex-col justify-center items-center text-center">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Saídas</span>
+                            <span className="text-lg md:text-xl font-bold text-red-700 font-serif">{formatCurrency(totalFiltrado.totalSaidas)}</span>
                         </div>
-                        <div className="bg-white border border-gray-200 shadow-sm p-4 rounded-lg flex flex-col justify-center items-center">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Saldo</span>
-                            <span className={`text-xl font-bold font-serif mt-1 ${totalFiltrado.saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                        <div className="bg-white border border-gray-100 shadow-sm p-4 md:p-5 rounded-2xl flex flex-col justify-center items-center text-center sm:col-span-2 md:col-span-1">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Saldo</span>
+                            <span className={`text-lg md:text-xl font-bold font-serif ${totalFiltrado.saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                 {formatCurrency(totalFiltrado.saldo)}
                             </span>
                         </div>
