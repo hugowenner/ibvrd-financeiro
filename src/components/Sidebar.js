@@ -24,17 +24,23 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <div 
                     className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
                     onClick={onClose}
+                    aria-label="Fechar menu"
                 ></div>
             )}
 
+            {/* 
+                CORREÇÃO: Removido 'hidden md:flex'.
+                Agora usamos 'flex' e 'translate-x' para controlar a visibilidade
+                tanto no mobile (off-screen) quanto no desktop (visível).
+            */}
             <aside className={`
-                fixed md:sticky top-0 z-50 md:z-auto w-72 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen transition-transform duration-300 ease-in-out
+                fixed md:sticky top-0 z-50 md:z-auto w-72 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-                hidden md:flex
             `}>
                 <div className="p-6 md:p-8 border-b border-gray-50 flex justify-between items-center">
                     <h2 className="text-2xl font-serif text-gray-900 font-semibold tracking-tight border-l-4 border-amber-600 pl-3">Menu</h2>
-                    <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600">
+                    {/* Botão fechar apenas mobile */}
+                    <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600 p-1">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
