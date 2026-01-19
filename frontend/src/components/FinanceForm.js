@@ -5,11 +5,13 @@ import { FinanceContext } from '../contexts/FinanceContext';
 
 const FinanceForm = () => {
     const { addLancamento, notify } = useContext(FinanceContext);
+    
+    // ALTERAÇÃO: Inicializa o valor como string '0.00'
     const [formData, setFormData] = useState({
         tipo: 'Entrada',
         categoria: 'Dízimo',
         descricao: '',
-        valor: '',
+        valor: '0.00', 
         data: new Date().toISOString().split('T')[0],
         formaPagamento: 'Pix',
         observacoes: '',
@@ -18,17 +20,62 @@ const FinanceForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Lógica Especial para MÁSCARA DE MOEDA (Digitação em tempo real)
+        if (name === 'valor') {
+            // 1. Remove tudo que não é dígito (pontos, vírgulas, letras)
+            let valorNumerico = value.replace(/\D/g, '');
+
+            // 2. Se estiver vazio, deixa vazio (o blur vai colocar 0.00 depois)
+            if (valorNumerico === '') {
+                setFormData(prev => ({ ...prev, valor: '' }));
+                return;
+            }
+
+            // 3. Converte para número (divide por 100 para transformar centavos em reais)
+            // Exemplo: usuário digita "100" -> vira "1.00"
+            //          usuário digita "1050" -> vira "10.50"
+            let valorFormatado = (parseInt(valorNumerico) / 100).toFixed(2);
+
+            setFormData(prev => ({ ...prev, valor: valorFormatado }));
+        } else {
+            // Para os outros campos, comportamento normal
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
+    // Handler para garantir que, ao sair do campo vazio, fique 0.00
+    const handleValorBlur = (e) => {
+        if (!e.target.value || e.target.value === '0.00') {
+            setFormData(prev => ({ ...prev, valor: '0.00' }));
+        }
+    };
+
+    // Handler para selecionar tudo ao clicar
+    const handleValorFocus = (e) => {
+        e.target.select();
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await addLancamento({ ...formData, valor: parseFloat(formData.valor) });
+            // Converte a string formatada '0.00' para float antes de enviar
+            await addLancamento({ 
+                ...formData, 
+                valor: parseFloat(formData.valor) 
+            });
             notify('Lançamento adicionado com sucesso!', 'success');
+            
+            // Reseta o form (Valor volta para 0.00)
             setFormData({
-                tipo: 'Entrada', categoria: 'Dízimo', descricao: '', valor: '', data: new Date().toISOString().split('T')[0], formaPagamento: 'Pix', observacoes: ''
+                tipo: 'Entrada', 
+                categoria: 'Dízimo', 
+                descricao: '', 
+                valor: '0.00', 
+                data: new Date().toISOString().split('T')[0], 
+                formaPagamento: 'Pix', 
+                observacoes: ''
             });
         } catch (error) {
             notify('Ocorreu um erro ao adicionar o lançamento.', 'error');
@@ -71,7 +118,18 @@ const FinanceForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <label className="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider font-sans">Valor (R$)</label>
-                    <input type="number" name="valor" value={formData.valor} onChange={handleChange} step="0.01" min="0.01" required className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition duration-200 font-mono min-h-[44px]" />
+                    <input 
+                        type="text" 
+                        inputMode="decimal" 
+                        name="valor" 
+                        value={formData.valor} 
+                        onChange={handleChange} // A mágica acontece aqui
+                        onBlur={handleValorBlur} 
+                        onFocus={handleValorFocus} 
+                        required 
+                        className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition duration-200 font-mono min-h-[44px]" 
+                        placeholder="0.00" 
+                    />
                 </div>
                 <div className="space-y-2">
                     <label className="block text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider font-sans">Data</label>

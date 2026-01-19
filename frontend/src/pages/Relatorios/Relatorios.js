@@ -1,6 +1,7 @@
-// src/pages/Relatorios.js
+// src/pages/Relatorios/Relatorios.js
 import React, { useContext, useMemo } from 'react';
-import { FinanceContext } from '../../contexts/FinanceContext';
+// CORREÇÃO AQUI: Mudei de '../contexts/' para '../../contexts/'
+import { FinanceContext } from '../../contexts/FinanceContext'; 
 import Card from '../../components/Card';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -9,6 +10,8 @@ const Relatorios = () => {
 
     const relatorioMensal = useMemo(() => {
         const agrupado = lancamentos.reduce((acc, lancamento) => {
+            if (!lancamento) return acc; // Segurança contra undefined
+
             const mesAno = lancamento.data.substring(0, 7); // YYYY-MM
             if (!acc[mesAno]) {
                 acc[mesAno] = { entradas: 0, saidas: 0 };
@@ -30,6 +33,8 @@ const Relatorios = () => {
 
     const relatorioPorCategoria = useMemo(() => {
         const agrupado = lancamentos.reduce((acc, lancamento) => {
+            if (!lancamento) return acc; // Segurança contra undefined
+
             if (!acc[lancamento.categoria]) {
                 acc[lancamento.categoria] = 0;
             }
