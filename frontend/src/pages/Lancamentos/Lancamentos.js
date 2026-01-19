@@ -17,6 +17,9 @@ const Lancamentos = () => {
 
     const lancamentosFiltrados = useMemo(() => {
         return lancamentos.filter(lancamento => {
+            // CORREÇÃO: Verifica se o item existe antes de acessar propriedades
+            if (!lancamento) return false;
+
             const matchTipo = !filters.tipo || lancamento.tipo === filters.tipo;
             const matchCategoria = !filters.categoria || lancamento.categoria === filters.categoria;
             const matchDataInicial = !filters.dataInicial || lancamento.data >= filters.dataInicial;
@@ -27,11 +30,11 @@ const Lancamentos = () => {
 
     const totalFiltrado = useMemo(() => {
         const totalEntradas = lancamentosFiltrados
-            .filter(l => l.tipo === 'Entrada')
+            .filter(l => l && l.tipo === 'Entrada') // Verifica segurança
             .reduce((sum, l) => sum + l.valor, 0);
         
         const totalSaidas = lancamentosFiltrados
-            .filter(l => l.tipo === 'Saída')
+            .filter(l => l && l.tipo === 'Saída') // Verifica segurança
             .reduce((sum, l) => sum + l.valor, 0);
 
         return { totalEntradas, totalSaidas, saldo: totalEntradas - totalSaidas };

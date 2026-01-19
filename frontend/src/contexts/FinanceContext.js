@@ -34,7 +34,17 @@ export const FinanceProvider = ({ children }) => {
     const addLancamento = async (lancamentoData) => {
         try {
             const response = await financeApi.addLancamento(lancamentoData);
-            setLancamentos(prevLancamentos => [...prevLancamentos, response.data]);
+            
+            // CORREÇÃO: Verifica se o PHP retornou o objeto 'data' antes de adicionar
+            if (response && response.data) {
+                setLancamentos(prevLancamentos => [...prevLancamentos, response.data]);
+            } else {
+                // Fallback: Se o backend falhar em retornar o objeto, recarrega a lista
+                // (Isso garante que o usuário veja o dado mesmo se o PHP não estiver 100% ajustado)
+                const fetchResponse = await financeApi.getLancamentos();
+                if(fetchResponse.data) setLancamentos(fetchResponse.data);
+            }
+            
             return response.data;
         } catch (error) {
             console.error("Falha ao adicionar lançamento:", error);

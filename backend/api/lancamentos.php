@@ -36,7 +36,9 @@ try {
         echo json_encode(['success' => true, 'data' => $data]);
     } 
     elseif ($method === 'POST') {
-        if (empty($input['descricao']) || !isset($input['valor'])) throw new Exception("Dados inválidos");
+        if (empty($input['descricao']) || !isset($input['valor'])) {
+            throw new Exception("Dados inválidos");
+        }
 
         $sql = "INSERT INTO lancamentos (user_id, tipo, categoria, descricao, valor, data, forma_pagamento, observacoes) 
                 VALUES (:uid, :tipo, :cat, :desc, :val, :data, :pag, :obs)";
@@ -52,7 +54,14 @@ try {
             ':pag' => $input['formaPagamento'] ?? 'Pix',
             ':obs' => $input['observacoes'] ?? ''
         ]);
-        echo json_encode(['success' => true, 'message' => 'Salvo']);
+
+        // CORREÇÃO: Busca o registro recém criado para retornar ao Front-end
+        $lastId = $pdo->lastInsertId();
+        $stmtRead = $pdo->prepare("SELECT * FROM lancamentos WHERE id = ?");
+        $stmtRead->execute([$lastId]);
+        $newItem = $stmtRead->fetch();
+
+        echo json_encode(['success' => true, 'data' => $newItem]);
     }
 
 } catch (Exception $e) {

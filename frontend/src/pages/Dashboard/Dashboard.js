@@ -1,3 +1,4 @@
+// src/pages/Dashboard.js
 import React, { useContext, useMemo } from 'react';
 import { FinanceContext } from '../../contexts/FinanceContext';
 import Card from '../../components/Card';
@@ -9,11 +10,11 @@ const Dashboard = () => {
     // 1. Cálculo de Entradas, Saídas e Saldo
     const resumo = useMemo(() => {
         const totalEntradas = lancamentos
-            .filter(l => l.tipo === 'Entrada')
+            .filter(l => l && l.tipo === 'Entrada') // Adicionado verificação 'l &&'
             .reduce((sum, l) => sum + l.valor, 0);
         
         const totalSaidas = lancamentos
-            .filter(l => l.tipo === 'Saída')
+            .filter(l => l && l.tipo === 'Saída') // Adicionado verificação 'l &&'
             .reduce((sum, l) => sum + l.valor, 0);
 
         const saldo = totalEntradas - totalSaidas;
@@ -25,6 +26,9 @@ const Dashboard = () => {
     const distribuicao = useMemo(() => {
         // Soma os valores por categoria
         const totals = lancamentos.reduce((acc, item) => {
+            // Adicionado verificação para garantir que 'item' existe antes de acessar 'categoria'
+            if (!item) return acc;
+
             acc[item.categoria] = (acc[item.categoria] || 0) + item.valor;
             return acc;
         }, {});
