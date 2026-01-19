@@ -1,14 +1,24 @@
-// src/components/Sidebar.js
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext'; // Importação do Auth
+import { FaSignOutAlt } from 'react-icons/fa'; // Importação do Ícone de Sair
 
 const Sidebar = ({ isOpen, onClose }) => {
     const location = useLocation();
+    const { logout } = useAuth(); // Hook para logout
 
     // Fecha o sidebar ao mudar de rota (comportamento mobile)
     React.useEffect(() => {
         if (isOpen) onClose();
     }, [location.pathname, isOpen, onClose]);
+
+    // Função de Logout
+    const handleLogout = () => {
+        logout();
+        if (window.innerWidth < 768) {
+            onClose(); // Fecha o menu se estiver no mobile
+        }
+    };
 
     const linkClasses = ({ isActive }) =>
         `flex items-center py-4 px-6 border-l-4 transition-all duration-200 group mb-1 font-sans ${
@@ -28,11 +38,6 @@ const Sidebar = ({ isOpen, onClose }) => {
                 ></div>
             )}
 
-            {/* 
-                CORREÇÃO: Removido 'hidden md:flex'.
-                Agora usamos 'flex' e 'translate-x' para controlar a visibilidade
-                tanto no mobile (off-screen) quanto no desktop (visível).
-            */}
             <aside className={`
                 fixed md:sticky top-0 z-50 md:z-auto w-72 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -56,6 +61,17 @@ const Sidebar = ({ isOpen, onClose }) => {
                         <span className="text-sm font-medium">Relatórios</span>
                     </NavLink>
                 </nav>
+
+                {/* BOTÃO DE SAIR (Inserido aqui) */}
+                <div className="p-6 border-t border-gray-50 mt-auto">
+                    <button 
+                        onClick={handleLogout}
+                        className="flex items-center w-full py-3 px-6 border-l-4 border-transparent text-gray-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-300 group"
+                    >
+                        <FaSignOutAlt className="text-lg transition-transform duration-300 group-hover:scale-110 text-gray-400 group-hover:text-red-600" />
+                        <span className="ml-4 font-serif text-sm tracking-wide">Sair do Sistema</span>
+                    </button>
+                </div>
 
                 <div className="p-6 border-t border-gray-50 mt-auto">
                     <div className="text-xs text-gray-400 text-center font-serif tracking-widest uppercase">
