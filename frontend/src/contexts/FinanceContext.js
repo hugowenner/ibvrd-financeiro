@@ -11,7 +11,6 @@ export const FinanceProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchLancamentos = async () => {
-            // IMPEDIR LOOP: Se não houver token, para por aqui.
             if (!localStorage.getItem('token')) {
                 setLoading(false);
                 return;
@@ -22,7 +21,6 @@ export const FinanceProvider = ({ children }) => {
                 setLancamentos(response.data);
             } catch (error) {
                 console.error("Falha ao buscar lançamentos:", error);
-                // Se for erro 401, o api.js já redireciona, não precisa fazer nada aqui
             } finally {
                 setLoading(false);
             }
@@ -35,12 +33,9 @@ export const FinanceProvider = ({ children }) => {
         try {
             const response = await financeApi.addLancamento(lancamentoData);
             
-            // CORREÇÃO: Verifica se o PHP retornou o objeto 'data' antes de adicionar
             if (response && response.data) {
                 setLancamentos(prevLancamentos => [...prevLancamentos, response.data]);
             } else {
-                // Fallback: Se o backend falhar em retornar o objeto, recarrega a lista
-                // (Isso garante que o usuário veja o dado mesmo se o PHP não estiver 100% ajustado)
                 const fetchResponse = await financeApi.getLancamentos();
                 if(fetchResponse.data) setLancamentos(fetchResponse.data);
             }
@@ -52,13 +47,40 @@ export const FinanceProvider = ({ children }) => {
         }
     };
 
+    // ============================================
+    // FUNÇÃO DE EXCLUSÃO (NOVA)
+    // ============================================
+    const deleteLancamento = async (id) => {
+        try {
+            // Faz a chamada DELETE passando o ID na URL
+            await financeApi.request(`lancamentos.php?id=${id}`, 'DELETE');
+            
+            // Remove o item da lista local (React State)
+            setLancamentos(prevLancamentos => prevLancamentos.filter(l => l.id !== id));
+            
+            // Notifica usuário
+            notify('Lançamento excluído com sucesso!', 'success');
+        } catch (error) {
+            console.error("Falha ao excluir lançamento:", error);
+            notify('Erro ao excluir lançamento.', 'error');
+            throw error;
+        }
+    };
+
     const notify = (message, type = 'success') => {
         setNotification({ message, type });
         setTimeout(() => setNotification(null), 4000);
     };
 
     return (
-        <FinanceContext.Provider value={{ lancamentos, loading, addLancamento, notification, notify }}>
+        <FinanceContext.Provider value={{ 
+            lancamentos, 
+            loading, 
+            addLancamento, 
+            deleteLancamento, // <--- EXPORTADO AQUI
+            notification, 
+            notify 
+        }}>
             {children}
         </FinanceContext.Provider>
     );

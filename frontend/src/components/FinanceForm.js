@@ -33,11 +33,29 @@ const FinanceForm = () => {
             }
 
             // 3. Converte para número (divide por 100 para transformar centavos em reais)
-            // Exemplo: usuário digita "100" -> vira "1.00"
-            //          usuário digita "1050" -> vira "10.50"
             let valorFormatado = (parseInt(valorNumerico) / 100).toFixed(2);
 
             setFormData(prev => ({ ...prev, valor: valorFormatado }));
+            return;
+        }
+
+        // ============================================
+        // LÓGICA INTELIGENTE: Categoria define o Tipo
+        // ============================================
+        if (name === 'categoria') {
+            let novoTipo = 'Entrada'; // Padrão para Dízimo, Oferta, etc.
+
+            // Se for uma categoria de despesa, muda automaticamente para Saída
+            if (value === 'Despesa Fixa' || value === 'Despesa Variável') {
+                novoTipo = 'Saída';
+            }
+
+            // Atualiza Categoria E o Tipo automaticamente
+            setFormData(prev => ({
+                ...prev,
+                categoria: value,
+                tipo: novoTipo
+            }));
         } else {
             // Para os outros campos, comportamento normal
             setFormData(prev => ({ ...prev, [name]: value }));

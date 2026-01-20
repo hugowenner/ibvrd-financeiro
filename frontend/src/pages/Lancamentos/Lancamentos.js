@@ -5,7 +5,7 @@ import Filters from '../../components/Filters';
 import Table from '../../components/Table';
 
 const Lancamentos = () => {
-    const { lancamentos, loading } = useContext(FinanceContext);
+    const { lancamentos, loading, deleteLancamento } = useContext(FinanceContext);
 
     // Estado para os filtros
     const [filters, setFilters] = useState({
@@ -75,8 +75,8 @@ const Lancamentos = () => {
                     {/* Componente de Filtros */}
                     <Filters filters={filters} onFilterChange={handleFilterChange} />
 
-                    {/* Componente de Tabela */}
-                    <Table data={filteredLancamentos} />
+                    {/* Componente de Tabela com prop onDelete */}
+                    <Table data={filteredLancamentos} onDelete={deleteLancamento} />
 
                 </div>
             </div>
