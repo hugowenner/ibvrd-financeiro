@@ -1,17 +1,16 @@
 <?php
 // backend/api/auth.php
 
-// O config.php já cuida do CORS e da conexão com o banco
 require_once 'config.php'; 
 
-// O config.php já tratou o OPTIONS (Preflight), podemos validar o método POST
-// (Isso só roda se NÃO for OPTIONS, graças ao exit no config.php)
+// Validação do Método
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'error' => 'Método não permitido']);
     exit;
 }
 
+// Recebimento de Dados
  $input = json_decode(file_get_contents('php://input'), true);
 
 if (!$input || empty($input['email']) || empty($input['password'])) {
@@ -35,12 +34,16 @@ try {
         exit;
     }
 
-    // Gera novo token
+    // ============================================
+    // GERAÇÃO DE TOKEN (Padrão Cadastro)
+    // ============================================
     $token = bin2hex(random_bytes(32));
     
+    // Atualiza o token no banco
     $update = $pdo->prepare("UPDATE users SET api_token = :token WHERE id = :id");
     $update->execute(['token' => $token, 'id' => $user['id']]);
 
+    // Retorna o Token e os dados do usuário
     echo json_encode([
         'success' => true,
         'token' => $token,

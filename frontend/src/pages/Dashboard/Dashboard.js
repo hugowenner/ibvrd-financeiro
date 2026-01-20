@@ -10,30 +10,31 @@ const Dashboard = () => {
     // 1. Cálculo de Entradas, Saídas e Saldo
     const resumo = useMemo(() => {
         const totalEntradas = lancamentos
-            .filter(l => l && l.tipo === 'Entrada') // Adicionado verificação 'l &&'
-            .reduce((sum, l) => sum + l.valor, 0);
+            .filter(l => l && l.tipo === 'Entrada') // Verifica segurança
+            .reduce((sum, l) => sum + (parseFloat(l.valor) || 0), 0); // CORREÇÃO: parseFloat || 0
         
         const totalSaidas = lancamentos
-            .filter(l => l && l.tipo === 'Saída') // Adicionado verificação 'l &&'
-            .reduce((sum, l) => sum + l.valor, 0);
+            .filter(l => l && l.tipo === 'Saída') // Verifica segurança
+            .reduce((sum, l) => sum + (parseFloat(l.valor) || 0), 0); // CORREÇÃO: parseFloat || 0
 
         const saldo = totalEntradas - totalSaidas;
 
         return { totalEntradas, totalSaidas, saldo };
     }, [lancamentos]);
 
-    // 2. Cálculo Dinâmico para Distribuição por Categoria (Substitui o Mockup)
+    // 2. Cálculo Dinâmico para Distribuição por Categoria
     const distribuicao = useMemo(() => {
         // Soma os valores por categoria
         const totals = lancamentos.reduce((acc, item) => {
-            // Adicionado verificação para garantir que 'item' existe antes de acessar 'categoria'
+            // Adicionado verificação para garantir que 'item' existe
             if (!item) return acc;
 
-            acc[item.categoria] = (acc[item.categoria] || 0) + item.valor;
+            // CORREÇÃO: parseFloat || 0
+            acc[item.categoria] = (acc[item.categoria] || 0) + (parseFloat(item.valor) || 0);
             return acc;
         }, {});
 
-        // Transforma o objeto em array para mapear no JSX
+        // Transforma o objeto em array
         const data = Object.entries(totals).map(([categoria, total]) => ({
             categoria,
             total
@@ -79,7 +80,7 @@ const Dashboard = () => {
                 ) : (
                     <div className="space-y-4 md:space-y-6">
                         {distribuicao.data.map((item) => {
-                            // Calcula a porcentagem em relação ao maior valor para definir a largura da barra
+                            // Calcula a porcentagem em relação ao maior valor
                             const percentagem = distribuicao.maxVal > 0 ? (item.total / distribuicao.maxVal) * 100 : 0;
                             
                             return (
