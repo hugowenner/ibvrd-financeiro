@@ -3,61 +3,70 @@ import React, { useContext, useState, useMemo } from 'react';
 import { FinanceContext } from '../../contexts/FinanceContext'; 
 import Card from '../../components/Card';
 import { formatCurrency } from '../../utils/formatters';
-import { FaPrint } from 'react-icons/fa'; // Ícone de impressão
+import { FaPrint } from 'react-icons/fa';
 
 const Relatorios = () => {
     const { lancamentos, loading } = useContext(FinanceContext);
-    
-    // Estado para o filtro de mês selecionado (formato 'YYYY-MM')
     const [selectedMonth, setSelectedMonth] = useState('');
 
-    // 1. Gera a lista de meses disponíveis nos lançamentos (para o Select)
+    // Função Auxiliar Compartilhada
+    const safeParseFloat = (value) => {
+        if (!value) return 0;
+        let str = String(value);
+        str = str.replace(/[^\d.,-]/g, '');
+        str = str.replace(',', '.');
+        const parsed = parseFloat(str);
+        return isNaN(parsed) ? 0 : parsed;
+    };
+
     const mesesDisponiveis = useMemo(() => {
         const meses = new Set();
         lancamentos.forEach(l => {
             if (l) {
-                const mesAno = l.data.substring(0, 7); // YYYY-MM
+                const mesAno = l.data.substring(0, 7); 
                 meses.add(mesAno);
             }
         });
-        // Converte para array, ordena (maior = mais recente) e volta para string
         return Array.from(meses).sort((a, b) => b.localeCompare(a));
     }, [lancamentos]);
 
-    // 2. Filtra os lançamentos com base no mês selecionado
     const lancamentosFiltrados = useMemo(() => {
         if (!selectedMonth) {
-            return lancamentos; // Se "Todos", retorna tudo
+            return lancamentos; 
         }
         return lancamentos.filter(l => l && l.data.startsWith(selectedMonth));
     }, [lancamentos, selectedMonth]);
 
-    // 3. Cálculo do Relatório Mensal (baseado nos lançamentos filtrados)
+    // CORREÇÃO DO CÁLCULO MENSAL
     const relatorioMensal = useMemo(() => {
         const agrupado = lancamentosFiltrados.reduce((acc, lancamento) => {
             if (!lancamento) return acc;
 
-            const mesAno = lancamento.data.substring(0, 7); // YYYY-MM
+            const mesAno = lancamento.data.substring(0, 7); 
             if (!acc[mesAno]) {
                 acc[mesAno] = { entradas: 0, saidas: 0 };
             }
+            
+            // CORREÇÃO: Agora soma números, não strings
+            const valor = safeParseFloat(lancamento.valor);
+
             if (lancamento.tipo === 'Entrada') {
-                acc[mesAno].entradas += lancamento.valor;
+                acc[mesAno].entradas += valor;
             } else {
-                acc[mesAno].saidas += lancamento.valor;
+                acc[mesAno].saidas += valor;
             }
             return acc;
         }, {});
 
         return Object.entries(agrupado).map(([mesAno, valores]) => ({
             mes: new Date(mesAno + '-01').toLocaleString('pt-BR', { month: 'long', year: 'numeric' }),
-            original: mesAno, // Mantém para ordenação ou chave se precisar
+            original: mesAno, 
             ...valores,
             saldo: valores.entradas - valores.saidas
         })).sort((a, b) => b.original.localeCompare(a.original));
     }, [lancamentosFiltrados]);
 
-    // 4. Cálculo do Relatório por Categoria (baseado nos lançamentos filtrados)
+    // CORREÇÃO DO CÁLCULO POR CATEGORIA
     const relatorioPorCategoria = useMemo(() => {
         const agrupado = lancamentosFiltrados.reduce((acc, lancamento) => {
             if (!lancamento) return acc;
@@ -65,7 +74,9 @@ const Relatorios = () => {
             if (!acc[lancamento.categoria]) {
                 acc[lancamento.categoria] = 0;
             }
-            acc[lancamento.categoria] += lancamento.valor;
+            
+            // CORREÇÃO: Soma numérica segura
+            acc[lancamento.categoria] += safeParseFloat(lancamento.valor);
             return acc;
         }, {});
         
@@ -75,12 +86,10 @@ const Relatorios = () => {
         })).sort((a, b) => b.total - a.total);
     }, [lancamentosFiltrados]);
 
-    // Função para imprimir
     const handlePrint = () => {
         window.print();
     };
 
-    // Formatador para o nome do mês no select (Ex: 2023-10 -> Outubro de 2023)
     const formatMonthLabel = (dateString) => {
         try {
             const [year, month] = dateString.split('-');
@@ -107,7 +116,6 @@ const Relatorios = () => {
                     <p className="text-gray-500 mt-2 font-sans font-light text-sm md:text-lg">Análise detalhada por período e categoria.</p>
                 </div>
 
-                {/* ÁREA DE FILTROS E AÇÕES */}
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                     <div className="w-full md:w-64">
                         <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-sans">
@@ -143,7 +151,6 @@ const Relatorios = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                {/* Card Resumo Mensal */}
                 <Card title={selectedMonth ? `Resumo de ${formatMonthLabel(selectedMonth)}` : "Resumo Mensal"} className="border-t-4 border-t-amber-600">
                     {relatorioMensal.length === 0 ? (
                         <div className="text-center py-8 text-gray-400 text-sm italic">
@@ -177,7 +184,6 @@ const Relatorios = () => {
                     )}
                 </Card>
 
-                {/* Card Total por Categoria */}
                 <Card title={selectedMonth ? "Categorias (Filtrado)" : "Total por Categoria"} className="border-t-4 border-t-amber-600">
                     {relatorioPorCategoria.length === 0 ? (
                         <div className="text-center py-8 text-gray-400 text-sm italic">

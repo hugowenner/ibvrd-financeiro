@@ -7,15 +7,36 @@ import { formatCurrency } from '../../utils/formatters';
 const Dashboard = () => {
     const { lancamentos, loading } = useContext(FinanceContext);
 
+    // ============================================
+    // FUNÇÃO DE SANITIZAÇÃO DE VALOR
+    // ============================================
+    // Remove "R$", espaços, troca vírgula por ponto e garante retorno de número
+    const safeParseFloat = (value) => {
+        if (!value) return 0;
+        
+        // Converte para string
+        let str = String(value);
+        
+        // Remove tudo que não for número, ponto ou vírgula (remove "R$", espaços, etc)
+        str = str.replace(/[^\d.,-]/g, '');
+        
+        // Se houver vírgula (padrão BR), troca por ponto (padrão JS)
+        // Ex: "1.000,00" -> "1000.00" (Nota: isso assume formato brasileiro padrão)
+        str = str.replace(',', '.');
+        
+        const parsed = parseFloat(str);
+        return isNaN(parsed) ? 0 : parsed;
+    };
+
     // 1. Cálculo de Entradas, Saídas e Saldo
     const resumo = useMemo(() => {
         const totalEntradas = lancamentos
-            .filter(l => l && l.tipo === 'Entrada') // Verifica segurança
-            .reduce((sum, l) => sum + (parseFloat(l.valor) || 0), 0); // CORREÇÃO: parseFloat || 0
+            .filter(l => l && l.tipo === 'Entrada')
+            .reduce((sum, l) => sum + safeParseFloat(l.valor), 0);
         
         const totalSaidas = lancamentos
-            .filter(l => l && l.tipo === 'Saída') // Verifica segurança
-            .reduce((sum, l) => sum + (parseFloat(l.valor) || 0), 0); // CORREÇÃO: parseFloat || 0
+            .filter(l => l && l.tipo === 'Saída')
+            .reduce((sum, l) => sum + safeParseFloat(l.valor), 0);
 
         const saldo = totalEntradas - totalSaidas;
 
@@ -24,13 +45,11 @@ const Dashboard = () => {
 
     // 2. Cálculo Dinâmico para Distribuição por Categoria
     const distribuicao = useMemo(() => {
-        // Soma os valores por categoria
         const totals = lancamentos.reduce((acc, item) => {
-            // Adicionado verificação para garantir que 'item' existe
             if (!item) return acc;
 
-            // CORREÇÃO: parseFloat || 0
-            acc[item.categoria] = (acc[item.categoria] || 0) + (parseFloat(item.valor) || 0);
+            // CORREÇÃO: Usa safeParseFloat para limpar "R$" ou vírgulas
+            acc[item.categoria] = (acc[item.categoria] || 0) + safeParseFloat(item.valor);
             return acc;
         }, {});
 
@@ -80,7 +99,6 @@ const Dashboard = () => {
                 ) : (
                     <div className="space-y-4 md:space-y-6">
                         {distribuicao.data.map((item) => {
-                            // Calcula a porcentagem em relação ao maior valor
                             const percentagem = distribuicao.maxVal > 0 ? (item.total / distribuicao.maxVal) * 100 : 0;
                             
                             return (
