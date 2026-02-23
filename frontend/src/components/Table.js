@@ -1,64 +1,76 @@
-// src/components/Table.js
 import React from 'react';
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
-// Adicionado prop onEdit
 const Table = ({ data, onDelete, onEdit }) => {
     return (
         <div className="overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm">
             <div className="overflow-x-auto">
-                <table className="min-w-full text-left">
+                <table className="min-w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-gray-50/50 border-b border-gray-100">
-                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Data</th>
-                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Descrição</th>
-                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase">Categoria</th>
-                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase text-right">Valor</th>
-                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase text-right">Ações</th>
+                        <tr className="bg-gray-50/80 border-b border-gray-100">
+                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Data</th>
+                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Descrição</th>
+                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Categoria</th>
+                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Valor</th>
+                            <th className="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {data.length === 0 ? (
                             <tr>
-                                <td colSpan="5" className="py-8 text-center text-gray-400">Nenhum registro encontrado.</td>
+                                <td colSpan="5" className="py-12 text-center text-gray-400 font-sans italic">Nenhum registro encontrado.</td>
                             </tr>
                         ) : (
-                            data.map((row) => (
-                                <tr key={row.id} className="hover:bg-amber-50 transition-colors duration-200 group">
-                                    <td className="py-4 px-6 text-sm text-gray-600">{formatDate(row.data)}</td>
-                                    <td className="py-4 px-6 text-sm text-gray-900 font-medium">{row.descricao}</td>
-                                    <td className="py-4 px-6 text-sm text-gray-600">
-                                        <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-500 rounded-full">
+                            data.map((row, index) => (
+                                <tr 
+                                    key={row.id} 
+                                    // Melhoria: Zebra striping + Hover suave
+                                    className={`transition-all duration-200 group ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-amber-50`}
+                                >
+                                    <td className="py-4 px-6 text-sm text-gray-600 font-medium whitespace-nowrap">
+                                        {formatDate(row.data)}
+                                    </td>
+                                    <td className="py-4 px-6 text-sm text-gray-900 font-semibold">
+                                        {row.descricao}
+                                        {row.observacoes && (
+                                            <div className="text-xs text-gray-400 font-normal mt-1 truncate max-w-[200px]" title={row.observacoes}>
+                                                {row.observacoes}
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td className="py-4 px-6 text-sm">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                             {row.categoria}
                                         </span>
                                     </td>
-                                    <td className={`py-4 px-6 text-sm font-bold text-right ${row.tipo === 'Entrada' ? 'text-green-700' : 'text-red-600'}`}>
+                                    <td className={`py-4 px-6 text-sm font-bold text-right font-mono ${row.tipo === 'Entrada' ? 'text-green-600' : 'text-red-500'}`}>
                                         {row.tipo === 'Entrada' ? '+' : '-'} {formatCurrency(row.valor)}
                                     </td>
-                                    <td className="py-4 px-6 text-right space-x-2">
-                                        {/* BOTÃO EDITAR */}
-                                        <button 
-                                            onClick={() => onEdit(row)}
-                                            className="text-gray-400 hover:text-amber-600 p-2 rounded-full hover:bg-amber-50"
-                                            title="Editar"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                            </svg>
-                                        </button>
-                                        
-                                        {/* BOTÃO EXCLUIR */}
-                                        <button 
-                                            onClick={() => {
-                                                if (window.confirm('Tem certeza?')) onDelete(row.id);
-                                            }}
-                                            className="text-gray-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50"
-                                            title="Excluir"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                        </button>
+                                    <td className="py-4 px-6 text-center whitespace-nowrap">
+                                        <div className="flex items-center justify-center gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            {/* Botão Editar */}
+                                            <button 
+                                                onClick={() => onEdit(row)}
+                                                className="p-2 rounded-full text-gray-400 hover:text-amber-600 hover:bg-amber-100 transition-colors"
+                                                title="Editar"
+                                            >
+                                                <FaPencilAlt className="text-sm" />
+                                            </button>
+                                            
+                                            {/* Botão Excluir */}
+                                            <button 
+                                                onClick={() => {
+                                                    if (window.confirm(`Tem certeza que deseja excluir "${row.descricao}"?`)) {
+                                                        onDelete(row.id);
+                                                    }
+                                                }}
+                                                className="p-2 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-100 transition-colors"
+                                                title="Excluir"
+                                            >
+                                                <FaTrash className="text-sm" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
