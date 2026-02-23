@@ -1,16 +1,27 @@
 // src/services/api.js
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const getBaseUrl = () => {
+    // Detecta se está em produção ou desenvolvimento
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Ajuste a porta/caminho conforme seu servidor local (XAMPP, WAMP, PHP -S)
+        return 'http://localhost:8000/api'; 
+    }
+    // URL de produção (ajuste para seu domínio real)
+    return 'https://financeiro.ibvrd.com.br/backend/api';
+};
 
-export const apiRequest = async (endpoint, method = 'GET', body = null) => {
+const API_URL = getBaseUrl();
+
+// Função genérica de requisição
+async function request(endpoint, method = 'GET', data = null) {
+    const url = `${API_URL}/${endpoint}`;
+    
     const headers = {
         'Content-Type': 'application/json',
     };
 
-    // Pega o token salvo no localStorage
+    // Pega o token salvo no login
     const token = localStorage.getItem('token');
-
-    // Adiciona o header Authorization se o token existir
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
@@ -18,46 +29,48 @@ export const apiRequest = async (endpoint, method = 'GET', body = null) => {
     const config = {
         method,
         headers,
-        // Removido credentials: 'include' pois não usamos mais cookies de sessão
     };
 
-    if (body) {
-        config.body = JSON.stringify(body);
+    if (data) {
+        config.body = JSON.stringify(data);
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/${endpoint}`, config);
-        
-        // Se o token for inválido (401), desloga o usuário
-        if (response.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login'; // Redireciona para login
-            throw new Error('Sessão expirada ou Token inválido');
-        }
+        const response = await fetch(url, config);
+        const result = await response.json();
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.error || 'Erro na requisição');
+            throw new Error(result.error || 'Erro desconhecido na API');
         }
 
-        return await response.json();
+        return result;
     } catch (error) {
-        console.error('API Error:', error);
+        console.error(`Erro na requisição ${method} ${endpoint}:`, error);
         throw error;
     }
-};
+}
 
 export const financeApi = {
+    // Autenticação
     login: async (email, password) => {
-        return await apiRequest('auth.php', 'POST', { email, password });
+        return request('auth.php', 'POST', { email, password });
     },
 
+    // Lançamentos
     getLancamentos: async () => {
-        return await apiRequest('lancamentos.php', 'GET'); 
+        return request('lancamentos.php', 'GET');
     },
 
     addLancamento: async (data) => {
-        return await apiRequest('lancamentos.php', 'POST', data);
+        return request('lancamentos.php', 'POST', data);
+    },
+
+    updateLancamento: async (id, data) => {
+        // Envia ID no corpo ou query param, aqui optei por enviar no corpo para simplificar
+        return request(`lancamentos.php?id=${id}`, 'PUT', data);
+    },
+
+    deleteLancamento: async (id) => {
+        return request(`lancamentos.php?id=${id}`, 'DELETE');
     }
 };

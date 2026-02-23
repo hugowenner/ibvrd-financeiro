@@ -1,22 +1,30 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react'; // Adicionar useRef
 import { NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; // Importação do Auth
-import { FaSignOutAlt } from 'react-icons/fa'; // Importação do Ícone de Sair
+import { useAuth } from '../contexts/AuthContext';
+import { FaSignOutAlt } from 'react-icons/fa';
 
 const Sidebar = ({ isOpen, onClose }) => {
     const location = useLocation();
-    const { logout } = useAuth(); // Hook para logout
+    const { logout } = useAuth();
+    
+    // Referência para guardar a rota anterior
+    const prevPathname = useRef(location.pathname);
 
-    // Fecha o sidebar ao mudar de rota (comportamento mobile)
-    React.useEffect(() => {
-        if (isOpen) onClose();
-    }, [location.pathname, isOpen, onClose]);
-
-    // Função de Logout
+    // CORREÇÃO: Só fecha o menu se a rota mudar de verdade
+    useEffect(() => {
+        // Se a rota mudou E o menu está aberto, fecha.
+        if (prevPathname.current !== location.pathname && isOpen) {
+            onClose();
+        }
+        // Atualiza a referência da rota anterior
+        prevPathname.current = location.pathname;
+    }, [location.pathname, isOpen, onClose]); 
+    
+    // ... resto do código (handleLogout, linkClasses) ...
     const handleLogout = () => {
         logout();
         if (window.innerWidth < 768) {
-            onClose(); // Fecha o menu se estiver no mobile
+            onClose();
         }
     };
 
@@ -44,7 +52,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             `}>
                 <div className="p-6 md:p-8 border-b border-gray-50 flex justify-between items-center">
                     <h2 className="text-2xl font-serif text-gray-900 font-semibold tracking-tight border-l-4 border-amber-600 pl-3">Menu</h2>
-                    {/* Botão fechar apenas mobile */}
                     <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600 p-1">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -62,7 +69,6 @@ const Sidebar = ({ isOpen, onClose }) => {
                     </NavLink>
                 </nav>
 
-                {/* BOTÃO DE SAIR (Inserido aqui) */}
                 <div className="p-6 border-t border-gray-50 mt-auto">
                     <button 
                         onClick={handleLogout}

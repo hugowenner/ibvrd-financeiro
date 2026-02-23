@@ -9,18 +9,21 @@ export const FinanceProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
 
+    // Carregar dados inicial
     useEffect(() => {
         const fetchLancamentos = async () => {
             if (!localStorage.getItem('token')) {
                 setLoading(false);
                 return;
             }
-
             try {
                 const response = await financeApi.getLancamentos();
-                setLancamentos(response.data);
+                if (response.success && response.data) {
+                    setLancamentos(response.data);
+                }
             } catch (error) {
                 console.error("Falha ao buscar lançamentos:", error);
+                notify('Erro ao carregar dados.', 'error');
             } finally {
                 setLoading(false);
             }
@@ -29,40 +32,46 @@ export const FinanceProvider = ({ children }) => {
         fetchLancamentos();
     }, []);
 
+    // Adicionar
     const addLancamento = async (lancamentoData) => {
         try {
             const response = await financeApi.addLancamento(lancamentoData);
-            
-            if (response && response.data) {
-                setLancamentos(prevLancamentos => [...prevLancamentos, response.data]);
-            } else {
-                const fetchResponse = await financeApi.getLancamentos();
-                if(fetchResponse.data) setLancamentos(fetchResponse.data);
+            if (response.success && response.data) {
+                setLancamentos(prev => [...prev, response.data]);
+                notify('Lançamento adicionado!', 'success');
+                return response.data;
             }
-            
-            return response.data;
         } catch (error) {
-            console.error("Falha ao adicionar lançamento:", error);
+            notify('Erro ao adicionar.', 'error');
             throw error;
         }
     };
 
-    // ============================================
-    // FUNÇÃO DE EXCLUSÃO (NOVA)
-    // ============================================
+    // Atualizar (NOVO)
+    const updateLancamento = async (id, lancamentoData) => {
+        try {
+            const response = await financeApi.updateLancamento(id, lancamentoData);
+            if (response.success && response.data) {
+                setLancamentos(prev => 
+                    prev.map(l => l.id === id ? response.data : l)
+                );
+                notify('Lançamento atualizado!', 'success');
+                return response.data;
+            }
+        } catch (error) {
+            notify('Erro ao atualizar.', 'error');
+            throw error;
+        }
+    };
+
+    // Excluir
     const deleteLancamento = async (id) => {
         try {
-            // Faz a chamada DELETE passando o ID na URL
-            await financeApi.request(`lancamentos.php?id=${id}`, 'DELETE');
-            
-            // Remove o item da lista local (React State)
-            setLancamentos(prevLancamentos => prevLancamentos.filter(l => l.id !== id));
-            
-            // Notifica usuário
-            notify('Lançamento excluído com sucesso!', 'success');
+            await financeApi.deleteLancamento(id);
+            setLancamentos(prev => prev.filter(l => l.id !== id));
+            notify('Lançamento excluído!', 'success');
         } catch (error) {
-            console.error("Falha ao excluir lançamento:", error);
-            notify('Erro ao excluir lançamento.', 'error');
+            notify('Erro ao excluir.', 'error');
             throw error;
         }
     };
@@ -77,7 +86,8 @@ export const FinanceProvider = ({ children }) => {
             lancamentos, 
             loading, 
             addLancamento, 
-            deleteLancamento, // <--- EXPORTADO AQUI
+            updateLancamento, // Exportado
+            deleteLancamento, 
             notification, 
             notify 
         }}>
