@@ -3,24 +3,34 @@ import { useContext } from 'react';
 import { FaSave, FaTimes, FaSpinner, FaSearch, FaChevronDown, FaCheckCircle } from 'react-icons/fa';
 import { FinanceContext } from '../contexts/FinanceContext';
 
+// --- NOVA FUNÇÃO AUXILIAR ---
+// Garante que pegamos a data local do usuário (YYYY-MM-DD) ignorando o UTC
+const getLocalDateString = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    // getMonth() retorna 0-11, então somamos 1
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+// --- FIM DA FUNÇÃO AUXILIAR ---
+
 // --- NOVO COMPONENTE: ComboBox Personalizado ---
-// Permite digitar livremente ou selecionar da lista com estilização total
+// ... (Mantenha o código do CategoryAutocomplete exatamente como estava) ...
 const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [inputValue, setInputValue] = useState(value || '');
     const containerRef = useRef(null);
 
-    // Sincroniza com o estado externo (caso o form seja limpo ou carregado com edição)
     useEffect(() => {
         setInputValue(value || '');
     }, [value]);
 
-    // Filtra as sugestões baseado no que foi digitado
     const filteredSuggestions = suggestions.filter(suggestion =>
         suggestion.toLowerCase().includes(inputValue.toLowerCase())
     );
 
-    // Fecha o dropdown ao clicar fora
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -35,7 +45,7 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
         const val = e.target.value;
         setInputValue(val);
         onChange({ target: { name, value: val } });
-        setIsOpen(true); // Abre a lista enquanto digita
+        setIsOpen(true);
     };
 
     const handleSelectOption = (suggestion) => {
@@ -46,26 +56,23 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
 
     return (
         <div ref={containerRef} className="relative z-20 w-full">
-            {/* Input Estilizado */}
             <div className="relative">
                 <input
                     type="text"
                     name={name}
                     value={inputValue}
                     onChange={handleInputChange}
-                    onFocus={() => setIsOpen(true)} // Abre ao focar
+                    onFocus={() => setIsOpen(true)}
                     placeholder="Selecione ou digite"
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-amber-600 focus:bg-white focus:border-transparent outline-none transition-all font-sans shadow-sm"
                     required
-                    autoComplete="off" // Evita histórico do navegador conflitar
+                    autoComplete="off"
                 />
-                {/* Ícone Dinâmico: Lupa ou Seta */}
                 <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
                     {isOpen ? <FaChevronDown className="text-sm text-amber-500" /> : <FaSearch className="text-sm" />}
                 </div>
             </div>
 
-            {/* Lista Suspensa (Dropdown) Estilizada */}
             {isOpen && filteredSuggestions.length > 0 && (
                 <ul className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto z-30 animate-fade-in-up">
                     {filteredSuggestions.map((suggestion, index) => (
@@ -91,12 +98,19 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
 const FinanceForm = ({ editingItem, onCancelEdit }) => {
     const { addLancamento, updateLancamento, notify } = useContext(FinanceContext);
     
-    // Lista de categorias
     const CATEGORIES = ['Dízimo', 'Oferta', 'Doação', 'Despesa Fixa', 'Despesa Variável'];
 
+    // --- CORREÇÃO AQUI ---
+    // Substituímos o new Date().toISOString() pela nossa função getLocalDateString()
     const getInitialData = () => ({
-        tipo: 'Entrada', categoria: '', descricao: '', valor: '', 
-        data: new Date().toISOString().split('T')[0], formaPagamento: 'Pix', observacoes: '',
+        tipo: 'Entrada', 
+        categoria: '', 
+        descricao: '', 
+        valor: '', 
+        // AGORA USA A DATA LOCAL CORRETA
+        data: getLocalDateString(), 
+        formaPagamento: 'Pix', 
+        observacoes: '',
     });
 
     const [formData, setFormData] = useState(getInitialData());

@@ -2,6 +2,12 @@
 // backend/api/lancamentos.php
 require_once 'config.php';
 
+// =================================================================
+// MELHORIA: Define o tipo de conteúdo imediatamente
+// =================================================================
+header('Content-Type: application/json; charset=utf-8');
+
+// Tratamento rápido para o preflight do CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
 
 // Middleware Auth
@@ -12,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
 if (!$token) {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Token ausente']);
-    exit;
+    exit; // MELHORIA: Força parada
 }
 
 try {
@@ -24,7 +30,7 @@ try {
     if (!$currentUser) {
         http_response_code(401);
         echo json_encode(['success' => false, 'error' => 'Token inválido']);
-        exit;
+        exit; // MELHORIA: Força parada
     }
 
     $user_id = $currentUser['id'];
@@ -32,7 +38,7 @@ try {
     $input = json_decode(file_get_contents('php://input'), true);
 
     // ==========================================
-    // GET: Listar (Apenas do usuário logado)
+    // GET: Listar
     // ==========================================
     if ($method === 'GET') {
         $sql = "SELECT * FROM lancamentos WHERE user_id = :uid ORDER BY data DESC, created_at DESC";
@@ -40,6 +46,7 @@ try {
         $stmt->execute([':uid' => $user_id]);
         $data = $stmt->fetchAll();
         echo json_encode(['success' => true, 'data' => $data]);
+        exit; // MELHORIA: Força parada
     } 
 
     // ==========================================
@@ -66,28 +73,29 @@ try {
         ]);
 
         $lastId = $pdo->lastInsertId();
-        // Retorna o objeto criado para o frontend atualizar a tela
+        // Retorna o objeto criado
         $stmtRead = $pdo->prepare("SELECT * FROM lancamentos WHERE id = ?");
         $stmtRead->execute([$lastId]);
         $newItem = $stmtRead->fetch();
 
         echo json_encode(['success' => true, 'data' => $newItem]);
+        exit; // MELHORIA: Força parada
     } 
 
     // ==========================================
-    // PUT: Alterar (NOVO)
+    // PUT: Alterar
     // ==========================================
     elseif ($method === 'PUT') {
         $id = $_GET['id'] ?? null;
         if (!$id) throw new Exception("ID não informado para alteração");
 
-        // Verifica se o lançamento pertence ao usuário
+        // Verifica permissão
         $check = $pdo->prepare("SELECT id FROM lancamentos WHERE id = :id AND user_id = :uid");
         $check->execute([':id' => $id, ':uid' => $user_id]);
         if (!$check->fetch()) {
             http_response_code(403);
             echo json_encode(['success' => false, 'error' => 'Ação não permitida']);
-            exit;
+            exit; // MELHORIA: Força parada
         }
 
         $sql = "UPDATE lancamentos SET 
@@ -113,12 +121,12 @@ try {
             ':uid' => $user_id
         ]);
 
-        // Retorna o item atualizado
         $stmtRead = $pdo->prepare("SELECT * FROM lancamentos WHERE id = ?");
         $stmtRead->execute([$id]);
         $updatedItem = $stmtRead->fetch();
 
         echo json_encode(['success' => true, 'data' => $updatedItem]);
+        exit; // MELHORIA: Força parada
     }
 
     // ==========================================
@@ -128,7 +136,6 @@ try {
         $id = $_GET['id'] ?? null;
         if (!$id) throw new Exception("ID não informado para exclusão");
 
-        // Garante que só exclui se for do próprio usuário
         $stmt = $pdo->prepare("DELETE FROM lancamentos WHERE id = :id AND user_id = :uid");
         $stmt->execute([':id' => $id, ':uid' => $user_id]);
 
@@ -137,9 +144,11 @@ try {
         } else {
             echo json_encode(['success' => false, 'error' => 'Nenhum registro encontrado ou sem permissão']);
         }
+        exit; // MELHORIA: Força parada (garante que nada mais rode depois disso)
     }
 
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    exit; // MELHORIA: Força parada
 }
