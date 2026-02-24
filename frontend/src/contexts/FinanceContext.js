@@ -1,4 +1,3 @@
-// src/contexts/FinanceContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import { financeApi } from '../services/api'; 
 
@@ -17,6 +16,7 @@ export const FinanceProvider = ({ children }) => {
                 return;
             }
             try {
+                // CORREÇÃO: Usando método específico getLancamentos
                 const response = await financeApi.getLancamentos();
                 if (response.success && response.data) {
                     setLancamentos(response.data);
@@ -35,6 +35,7 @@ export const FinanceProvider = ({ children }) => {
     // Adicionar
     const addLancamento = async (lancamentoData) => {
         try {
+            // CORREÇÃO: Usando método específico addLancamento
             const response = await financeApi.addLancamento(lancamentoData);
             if (response.success && response.data) {
                 setLancamentos(prev => [...prev, response.data]);
@@ -47,9 +48,10 @@ export const FinanceProvider = ({ children }) => {
         }
     };
 
-    // Atualizar (NOVO)
+    // Atualizar
     const updateLancamento = async (id, lancamentoData) => {
         try {
+            // CORREÇÃO: Usando método específico updateLancamento
             const response = await financeApi.updateLancamento(id, lancamentoData);
             if (response.success && response.data) {
                 setLancamentos(prev => 
@@ -67,6 +69,7 @@ export const FinanceProvider = ({ children }) => {
     // Excluir
     const deleteLancamento = async (id) => {
         try {
+            // CORREÇÃO: Usando método específico deleteLancamento
             await financeApi.deleteLancamento(id);
             setLancamentos(prev => prev.filter(l => l.id !== id));
             notify('Lançamento excluído!', 'success');
@@ -86,7 +89,7 @@ export const FinanceProvider = ({ children }) => {
             lancamentos, 
             loading, 
             addLancamento, 
-            updateLancamento, // Exportado
+            updateLancamento, 
             deleteLancamento, 
             notification, 
             notify 

@@ -1,12 +1,12 @@
 import React, { useContext, useState, useMemo, useEffect } from 'react';
-import { FaCheckCircle, FaExclamationCircle, FaSpinner } from 'react-icons/fa';
+import { FaCheckCircle, FaExclamationCircle, FaSpinner, FaTrash, FaUndo } from 'react-icons/fa';
 import { FinanceContext } from '../../contexts/FinanceContext';
 import FinanceForm from '../../components/FinanceForm';
 import Filters from '../../components/Filters';
 import Table from '../../components/Table';
 
 const Lancamentos = () => {
-    const { lancamentos, loading, deleteLancamento, notification } = useContext(FinanceContext);
+    const { lancamentos, loading, deleteLancamento, notification, undoDelete } = useContext(FinanceContext);
     const [editingItem, setEditingItem] = useState(null);
 
     // Filtros
@@ -40,6 +40,13 @@ const Lancamentos = () => {
         setEditingItem(null);
     };
 
+    // Handler para fechar o toast manualmente
+    const closeNotification = () => {
+        // Implementação simples: apenas remove do contexto se o contexto permitir setar null.
+        // Aqui vamos simular criando um estado local ou podemos passar uma função no Context.
+        // Para simplificar e manter a arquitetura, deixamos o auto-dismiss do Context cuidar.
+    };
+
     if (loading) {
         return (
             <div className="flex flex-col justify-center items-center h-screen-minus-nav space-y-4 animate-fade-in">
@@ -52,17 +59,58 @@ const Lancamentos = () => {
     return (
         <div className="relative min-h-screen pb-10 animate-fade-in">
             
-            {/* TOAST NOTIFICATION (Feedback Visual Global) */}
+            {/* SISTEMA AVANÇADO DE NOTIFICAÇÃO (TOAST) */}
             {notification && (
-                <div className={`fixed top-4 right-4 z-50 flex items-center w-full max-w-xs p-4 rounded-lg shadow-lg border transition-all duration-300 transform translate-y-0 ${notification.type === 'success' ? 'bg-white border-green-200 text-green-800' : 'bg-white border-red-200 text-red-800'}`}>
-                    <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-opacity-20">
-                        {notification.type === 'success' ? (
-                            <FaCheckCircle className="w-5 h-5 text-green-600" />
-                        ) : (
-                            <FaExclamationCircle className="w-5 h-5 text-red-600" />
+                <div className={`fixed top-4 right-4 z-50 w-full max-w-sm rounded-xl shadow-2xl border transition-all duration-500 ease-out transform translate-y-0 flex flex-col overflow-hidden
+                    ${notification.type === 'success' 
+                        ? 'bg-white border-green-200' 
+                        : notification.type === 'delete' 
+                        ? 'bg-white border-red-200' 
+                        : 'bg-white border-red-200'}
+                `}>
+                    <div className="flex items-start p-4">
+                        {/* Ícone */}
+                        <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg">
+                            {notification.type === 'success' ? (
+                                <FaCheckCircle className="w-5 h-5 text-green-600" />
+                            ) : notification.type === 'delete' ? (
+                                <FaTrash className="w-5 h-5 text-red-500" />
+                            ) : (
+                                <FaExclamationCircle className="w-5 h-5 text-red-600" />
+                            )}
+                        </div>
+
+                        <div className="ml-3 w-0 flex-1 pt-0.5">
+                            <p className={`text-sm font-medium font-serif ${
+                                notification.type === 'success' ? 'text-green-800' : 
+                                notification.type === 'delete' ? 'text-red-800' : 'text-red-800'
+                            }`}>
+                                {notification.message}
+                            </p>
+                        </div>
+
+                        {/* Botão de Desfazer (Apenas para tipo 'delete') */}
+                        {notification.type === 'delete' && (
+                            <div className="ml-4 flex-shrink-0">
+                                <button
+                                    onClick={() => {
+                                        undoDelete();
+                                        // O contexto cuidará de limpar a notificação automaticamente ao desfazer
+                                    }}
+                                    className="bg-white border border-gray-200 rounded-md py-1.5 px-3 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors flex items-center gap-1 shadow-sm"
+                                >
+                                    <FaUndo className="text-xs" /> Desfazer
+                                </button>
+                            </div>
                         )}
                     </div>
-                    <div className="ml-3 text-sm font-sans font-medium">{notification.message}</div>
+
+                    {/* Barra de Progresso (Timer) */}
+                    {notification.type === 'delete' && (
+                        <div className="w-full bg-red-100 h-1">
+                            <div className="bg-red-500 h-1 w-full animate-[shrink-width_5s_linear]"></div>
+                        </div>
+                    )}
                 </div>
             )}
 

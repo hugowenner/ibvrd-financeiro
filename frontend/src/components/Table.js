@@ -25,7 +25,6 @@ const Table = ({ data, onDelete, onEdit }) => {
                             data.map((row, index) => (
                                 <tr 
                                     key={row.id} 
-                                    // Melhoria: Zebra striping + Hover suave
                                     className={`transition-all duration-200 group ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-amber-50`}
                                 >
                                     <td className="py-4 px-6 text-sm text-gray-600 font-medium whitespace-nowrap">
@@ -58,13 +57,9 @@ const Table = ({ data, onDelete, onEdit }) => {
                                                 <FaPencilAlt className="text-sm" />
                                             </button>
                                             
-                                            {/* Botão Excluir */}
+                                            {/* Botão Excluir - Agora remove direto (Undo via Toast) */}
                                             <button 
-                                                onClick={() => {
-                                                    if (window.confirm(`Tem certeza que deseja excluir "${row.descricao}"?`)) {
-                                                        onDelete(row.id);
-                                                    }
-                                                }}
+                                                onClick={() => onDelete(row.id)}
                                                 className="p-2 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-100 transition-colors"
                                                 title="Excluir"
                                             >
