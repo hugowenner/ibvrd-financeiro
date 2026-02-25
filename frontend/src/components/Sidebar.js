@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'; // Adicionar useRef
+import React, { useEffect, useRef } from 'react'; 
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaSignOutAlt } from 'react-icons/fa';
@@ -9,18 +9,31 @@ const Sidebar = ({ isOpen, onClose }) => {
     
     // Referência para guardar a rota anterior
     const prevPathname = useRef(location.pathname);
+    
+    // Referência para o container do sidebar (usada para detectar clique fora)
+    const containerRef = useRef(null);
 
-    // CORREÇÃO: Só fecha o menu se a rota mudar de verdade
+    // Lógica: Fechar se a rota mudar (Mantido)
     useEffect(() => {
-        // Se a rota mudou E o menu está aberto, fecha.
         if (prevPathname.current !== location.pathname && isOpen) {
             onClose();
         }
-        // Atualiza a referência da rota anterior
         prevPathname.current = location.pathname;
     }, [location.pathname, isOpen, onClose]); 
     
-    // ... resto do código (handleLogout, linkClasses) ...
+    // Lógica NOVA: Fechar ao clicar fora do sidebar
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Se o menu estiver aberto E o clique NÃO foi dentro do sidebar, fecha.
+            if (isOpen && containerRef.current && !containerRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, onClose]);
+    
     const handleLogout = () => {
         logout();
         if (window.innerWidth < 768) {
@@ -37,7 +50,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     return (
         <>
-            {/* Overlay Mobile */}
+            {/* Overlay Mobile (Fundo escuro) */}
             {isOpen && (
                 <div 
                     className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
@@ -46,7 +59,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 ></div>
             )}
 
-            <aside className={`
+            {/* Sidebar Container - Adicionei o ref={containerRef} aqui */}
+            <aside 
+                ref={containerRef}
+                className={`
                 fixed md:sticky top-0 z-50 md:z-auto w-72 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-screen transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>

@@ -1,13 +1,19 @@
-// src/components/Header.js
 import React from 'react';
 
 const Header = ({ onMenuToggle }) => {
+    // Função auxiliar para evitar conflitos de clique
+    const handleMenuClick = (e) => {
+        e.stopPropagation(); // Impede que o clique suba para o documento
+        onMenuToggle();
+    };
+
     return (
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-30 transition-all duration-300 h-16 md:h-auto">
             <div className="container mx-auto px-4 md:px-6 py-3 md:py-6 flex items-center justify-between h-full">
                 <div className="flex items-center gap-4">
+                    {/* Adicionei a função handleMenuClick no onClick */}
                     <button 
-                        onClick={onMenuToggle}
+                        onClick={handleMenuClick}
                         className="md:hidden text-gray-600 hover:text-amber-600 transition-colors p-2"
                         aria-label="Abrir menu"
                     >
