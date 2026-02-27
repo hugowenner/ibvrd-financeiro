@@ -119,7 +119,14 @@ const FinanceForm = ({ editingItem, onCancelEdit }) => {
         setIsSubmitting(true);
         setShowConfirmModal(false); // Fecha o modal se estiver aberto
         try {
-            const payload = { ...formData, valor: parseFloat(formData.valor) };
+            const payload = {
+                ...formData,
+                valor: parseFloat(formData.valor),
+                // CORREÇÃO APLICADA: Garante que 'formaPagamento' nunca seja undefined,
+                // evitando erros de conversão no backend se o estado falhar.
+                formaPagamento: formData.formaPagamento || 'Pix'
+            };
+
             if (editingItem) {
                 await updateLancamento(editingItem.id, payload);
                 onCancelEdit();
