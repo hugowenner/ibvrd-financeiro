@@ -1,18 +1,18 @@
 // src/routes/AppRoutes.js
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; 
+import { useAuth } from '../contexts/AuthContext';
+// NOVO: Importar o FinanceProvider
+import { FinanceProvider } from '../contexts/FinanceContext'; 
 
 // Importações de Páginas
 import AppLayout from '../AppLayout';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Lancamentos from '../pages/Lancamentos/Lancamentos';
 import Relatorios from '../pages/Relatorios/Relatorios';
-
-// IMPORTANTE: Caminho ajustado para a nova pasta src/pages/Login
 import Login from '../pages/Login/Login'; 
 
-// Componente de Proteção
+// Componente de Proteção Atualizado
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
     
@@ -22,7 +22,13 @@ const ProtectedRoute = ({ children }) => {
         return <Navigate to="/login" replace />;
     }
     
-    return children;
+    // SOLUÇÃO: Envolvemos os filhos (rotas protegidas) com o FinanceProvider.
+    // Agora ele só monta quando o usuário está autenticado.
+    return (
+        <FinanceProvider>
+            {children}
+        </FinanceProvider>
+    );
 };
 
 const AppRoutes = () => {
