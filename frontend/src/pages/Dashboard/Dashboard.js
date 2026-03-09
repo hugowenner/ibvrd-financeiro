@@ -1,4 +1,3 @@
-// src/pages/Dashboard/Dashboard.js
 import React, { useContext, useState, useMemo } from 'react';
 import { FinanceContext } from '../../contexts/FinanceContext';
 import Card from '../../components/Card';
@@ -11,34 +10,67 @@ const Dashboard = () => {
     const [period, setPeriod] = useState('month');
 
     const safeParseFloat = (value) => {
-        if (!value) return 0;
-        let str = String(value).replace(/[^\d.,-]/g, '').replace(',', '.');
+        if (value === null || value === undefined || value === '') return 0;
+
+        if (typeof value === 'number') {
+            return Number.isFinite(value) ? value : 0;
+        }
+
+        let str = String(value).trim();
+        str = str.replace(/[^\d.,-]/g, '');
+
+        if (str.includes(',') && str.includes('.')) {
+            str = str.replace(/\./g, '').replace(',', '.');
+        } else if (str.includes(',')) {
+            str = str.replace(',', '.');
+        }
+
         const parsed = parseFloat(str);
-        return isNaN(parsed) ? 0 : parsed;
+        return Number.isNaN(parsed) ? 0 : parsed;
+    };
+
+    const normalizeTipo = (tipo) => {
+        const value = String(tipo || '')
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
+        if (value === 'entrada' || value === 'entradas') return 'entrada';
+        if (value === 'saida' || value === 'saidas') return 'saida';
+
+        return value;
     };
 
     const getDateRange = (periodKey) => {
         const now = new Date();
-        const start = new Date();
-        const end = new Date();
+        const start = new Date(now);
+        const end = new Date(now);
 
         switch (periodKey) {
             case 'today':
                 start.setHours(0, 0, 0, 0);
                 end.setHours(23, 59, 59, 999);
                 break;
+
             case '7':
-                start.setDate(now.getDate() - 7);
+                start.setDate(now.getDate() - 6);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
                 break;
+
             case '30':
-                start.setDate(now.getDate() - 30);
+                start.setDate(now.getDate() - 29);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
                 break;
+
             case 'month':
                 start.setDate(1);
                 start.setHours(0, 0, 0, 0);
-                end.setMonth(now.getMonth() + 1);
-                end.setDate(0);
+                end.setHours(23, 59, 59, 999);
                 break;
+
             case 'all':
             default:
                 return null;
@@ -47,68 +79,99 @@ const Dashboard = () => {
         return { start, end };
     };
 
+    const listaLancamentos = useMemo(() => {
+        return Array.isArray(lancamentos) ? lancamentos : [];
+    }, [lancamentos]);
+
     const filteredLancamentos = useMemo(() => {
         const range = getDateRange(period);
-        if (!range) return lancamentos;
+        if (!range) return listaLancamentos;
 
-        return lancamentos.filter((l) => {
+        return listaLancamentos.filter((l) => {
             if (!l || !l.data) return false;
-            const date = new Date(l.data + 'T00:00:00');
+            const date = new Date(`${l.data}T00:00:00`);
             return date >= range.start && date <= range.end;
         });
-    }, [lancamentos, period]);
+    }, [listaLancamentos, period]);
 
     const previousPeriodLancamentos = useMemo(() => {
         const range = getDateRange(period);
         if (!range) return [];
 
-        const diff = range.end - range.start;
-        const prevStart = new Date(range.start.getTime() - diff);
-        const prevEnd = new Date(range.start.getTime() - 1);
+        let prevStart;
+        let prevEnd;
 
-        return lancamentos.filter((l) => {
+        if (period === 'today') {
+            prevStart = new Date(range.start);
+            prevStart.setDate(prevStart.getDate() - 1);
+            prevStart.setHours(0, 0, 0, 0);
+
+            prevEnd = new Date(prevStart);
+            prevEnd.setHours(23, 59, 59, 999);
+        } else if (period === '7') {
+            prevStart = new Date(range.start);
+            prevStart.setDate(prevStart.getDate() - 7);
+            prevStart.setHours(0, 0, 0, 0);
+
+            prevEnd = new Date(range.start);
+            prevEnd.setMilliseconds(-1);
+        } else if (period === '30') {
+            prevStart = new Date(range.start);
+            prevStart.setDate(prevStart.getDate() - 30);
+            prevStart.setHours(0, 0, 0, 0);
+
+            prevEnd = new Date(range.start);
+            prevEnd.setMilliseconds(-1);
+        } else if (period === 'month') {
+            prevStart = new Date(range.start.getFullYear(), range.start.getMonth() - 1, 1, 0, 0, 0, 0);
+            prevEnd = new Date(range.start.getFullYear(), range.start.getMonth(), 0, 23, 59, 59, 999);
+        } else {
+            return [];
+        }
+
+        return listaLancamentos.filter((l) => {
             if (!l || !l.data) return false;
-            const date = new Date(l.data + 'T00:00:00');
+            const date = new Date(`${l.data}T00:00:00`);
             return date >= prevStart && date <= prevEnd;
         });
-    }, [lancamentos, period]);
+    }, [listaLancamentos, period]);
+
+    const sumByTipo = (items, tipoDesejado) => {
+        return items
+            .filter((l) => normalizeTipo(l.tipo_normalizado || l.tipo) === tipoDesejado)
+            .reduce((sum, l) => sum + safeParseFloat(l.valor), 0);
+    };
+
+    const countByTipo = (items, tipoDesejado) => {
+        return items.filter((l) => normalizeTipo(l.tipo_normalizado || l.tipo) === tipoDesejado).length;
+    };
+
+    const calcPercent = (current, prev) => {
+        if (prev === 0 && current === 0) return 0;
+        if (prev === 0 && current > 0) return null;
+        return ((current - prev) / prev) * 100;
+    };
 
     const metrics = useMemo(() => {
-        const totalEntradas = filteredLancamentos
-            .filter((l) => l.tipo === 'Entrada')
-            .reduce((sum, l) => sum + safeParseFloat(l.valor), 0);
-
-        const totalSaidas = filteredLancamentos
-            .filter((l) => l.tipo === 'Saída')
-            .reduce((sum, l) => sum + safeParseFloat(l.valor), 0);
-
+        const totalEntradas = sumByTipo(filteredLancamentos, 'entrada');
+        const totalSaidas = sumByTipo(filteredLancamentos, 'saida');
         const saldo = totalEntradas - totalSaidas;
 
-        const prevEntradas = previousPeriodLancamentos
-            .filter((l) => l.tipo === 'Entrada')
-            .reduce((sum, l) => sum + safeParseFloat(l.valor), 0);
-
-        const prevSaidas = previousPeriodLancamentos
-            .filter((l) => l.tipo === 'Saída')
-            .reduce((sum, l) => sum + safeParseFloat(l.valor), 0);
-
-        const calcPercent = (current, prev) => {
-            if (prev === 0) return current > 0 ? 100 : 0;
-            return ((current - prev) / prev) * 100;
-        };
+        const prevEntradas = sumByTipo(previousPeriodLancamentos, 'entrada');
+        const prevSaidas = sumByTipo(previousPeriodLancamentos, 'saida');
 
         return {
-            totalEntradas,
-            totalSaidas,
-            saldo,
+            totalEntradas: Number.isFinite(totalEntradas) ? totalEntradas : 0,
+            totalSaidas: Number.isFinite(totalSaidas) ? totalSaidas : 0,
+            saldo: Number.isFinite(saldo) ? saldo : 0,
             variacaoEntradas: calcPercent(totalEntradas, prevEntradas),
             variacaoSaidas: calcPercent(totalSaidas, prevSaidas),
         };
     }, [filteredLancamentos, previousPeriodLancamentos]);
 
     const totalizador = useMemo(() => {
-        const entradas = filteredLancamentos.filter((l) => l.tipo === 'Entrada').length;
-        const saidas = filteredLancamentos.filter((l) => l.tipo === 'Saída').length;
+        const entradas = countByTipo(filteredLancamentos, 'entrada');
+        const saidas = countByTipo(filteredLancamentos, 'saida');
 
         return {
             total: filteredLancamentos.length,
@@ -119,7 +182,7 @@ const Dashboard = () => {
 
     const topCategories = useMemo(() => {
         const totals = filteredLancamentos.reduce((acc, item) => {
-            if (!item) return acc;
+            if (!item || !item.categoria) return acc;
             acc[item.categoria] = (acc[item.categoria] || 0) + safeParseFloat(item.valor);
             return acc;
         }, {});
@@ -135,15 +198,15 @@ const Dashboard = () => {
 
     const distribuicao = useMemo(() => {
         const totals = filteredLancamentos.reduce((acc, item) => {
-            if (!item) return acc;
+            if (!item || !item.categoria) return acc;
             acc[item.categoria] = (acc[item.categoria] || 0) + safeParseFloat(item.valor);
             return acc;
         }, {});
 
         const data = Object.entries(totals).map(([categoria, total]) => ({ categoria, total }));
         data.sort((a, b) => b.total - a.total);
-        const maxVal = data.length > 0 ? data[0].total : 0;
 
+        const maxVal = data.length > 0 ? data[0].total : 0;
         return { data, maxVal };
     }, [filteredLancamentos]);
 
@@ -172,7 +235,12 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
                 <Card title="Entradas" value={formatCurrency(metrics.totalEntradas)} valueColor="text-positivo">
                     <div className="mt-2 flex items-center gap-1 text-xs">
-                        {metrics.variacaoEntradas !== 0 && (
+                        {metrics.variacaoEntradas === null ? (
+                            <span className="flex items-center gap-1 text-green-600">
+                                <FaArrowUp />
+                                Novo
+                            </span>
+                        ) : metrics.variacaoEntradas !== 0 ? (
                             <span
                                 className={`flex items-center gap-1 ${
                                     metrics.variacaoEntradas >= 0 ? 'text-green-600' : 'text-red-500'
@@ -181,21 +249,28 @@ const Dashboard = () => {
                                 {metrics.variacaoEntradas >= 0 ? <FaArrowUp /> : <FaArrowDown />}
                                 {Math.abs(metrics.variacaoEntradas).toFixed(1)}%
                             </span>
-                        )}
+                        ) : null}
                         <span className="text-gray-400 ml-1">vs período anterior</span>
                     </div>
                 </Card>
 
                 <Card title="Saídas" value={formatCurrency(metrics.totalSaidas)} valueColor="text-negativo">
                     <div className="mt-2 flex items-center gap-1 text-xs">
-                        <span
-                            className={`flex items-center gap-1 ${
-                                metrics.variacaoSaidas <= 0 ? 'text-green-600' : 'text-red-500'
-                            }`}
-                        >
-                            {metrics.variacaoSaidas <= 0 ? <FaArrowDown /> : <FaArrowUp />}
-                            {Math.abs(metrics.variacaoSaidas).toFixed(1)}%
-                        </span>
+                        {metrics.variacaoSaidas === null ? (
+                            <span className="flex items-center gap-1 text-red-500">
+                                <FaArrowUp />
+                                Novo
+                            </span>
+                        ) : (
+                            <span
+                                className={`flex items-center gap-1 ${
+                                    metrics.variacaoSaidas <= 0 ? 'text-green-600' : 'text-red-500'
+                                }`}
+                            >
+                                {metrics.variacaoSaidas <= 0 ? <FaArrowDown /> : <FaArrowUp />}
+                                {Math.abs(metrics.variacaoSaidas).toFixed(1)}%
+                            </span>
+                        )}
                         <span className="text-gray-400 ml-1">vs período anterior</span>
                     </div>
                 </Card>
@@ -251,7 +326,11 @@ const Dashboard = () => {
                                     <div className="w-full bg-gray-100 rounded-full h-2">
                                         <div
                                             className="bg-indigo-500 h-2 rounded-full transition-all duration-500"
-                                            style={{ width: `${(cat.total / topCategories.maxVal) * 100}%` }}
+                                            style={{
+                                                width: topCategories.maxVal > 0
+                                                    ? `${(cat.total / topCategories.maxVal) * 100}%`
+                                                    : '0%',
+                                            }}
                                         ></div>
                                     </div>
                                 </div>
