@@ -456,3 +456,186 @@
 [2026-03-09 17:08:03] Usuário encontrado. Verificando senha...
 [2026-03-09 17:08:03] Senha correta. Gerando token: 14108d7ab7...
 [2026-03-09 17:08:03] Login realizado com sucesso! ID: 1
+[2026-03-09 19:06:19] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:19] Método: OPTIONS
+[2026-03-09 19:06:19] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Accept] => */*
+    [Access-Control-Request-Method] => POST
+    [Access-Control-Request-Headers] => content-type
+    [Origin] => http://localhost:3000
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:19] Requisição OPTIONS recebida. Retornando 200 OK.
+[2026-03-09 19:06:19] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:19] Método: POST
+[2026-03-09 19:06:19] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Content-Length] => 50
+    [sec-ch-ua-platform] => "Windows"
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [sec-ch-ua] => "Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+    [Content-Type] => application/json
+    [sec-ch-ua-mobile] => ?0
+    [Accept] => */*
+    [Origin] => http://localhost:3000
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:19] Input Bruto Recebido: {"email":"admin@ibvrd.com.br","password":"123456"}
+[2026-03-09 19:06:19] Tentativa de login para: admin@ibvrd.com.br
+[2026-03-09 19:06:19] ERRO: Usuário não encontrado.
+[2026-03-09 19:06:25] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:25] Método: OPTIONS
+[2026-03-09 19:06:25] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Accept] => */*
+    [Access-Control-Request-Method] => POST
+    [Access-Control-Request-Headers] => content-type
+    [Origin] => http://localhost:3000
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:25] Requisição OPTIONS recebida. Retornando 200 OK.
+[2026-03-09 19:06:25] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:25] Método: POST
+[2026-03-09 19:06:25] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Content-Length] => 50
+    [sec-ch-ua-platform] => "Windows"
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [sec-ch-ua] => "Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+    [Content-Type] => application/json
+    [sec-ch-ua-mobile] => ?0
+    [Accept] => */*
+    [Origin] => http://localhost:3000
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:25] Input Bruto Recebido: {"email":"admin@ibvrd.com.br","password":"123456"}
+[2026-03-09 19:06:25] Tentativa de login para: admin@ibvrd.com.br
+[2026-03-09 19:06:25] ERRO: Usuário não encontrado.
+[2026-03-09 19:06:29] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:29] Método: OPTIONS
+[2026-03-09 19:06:29] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Accept] => */*
+    [Access-Control-Request-Method] => POST
+    [Access-Control-Request-Headers] => content-type
+    [Origin] => http://localhost:3000
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:29] Requisição OPTIONS recebida. Retornando 200 OK.
+[2026-03-09 19:06:29] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:29] Método: POST
+[2026-03-09 19:06:29] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Content-Length] => 48
+    [sec-ch-ua-platform] => "Windows"
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [sec-ch-ua] => "Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+    [Content-Type] => application/json
+    [sec-ch-ua-mobile] => ?0
+    [Accept] => */*
+    [Origin] => http://localhost:3000
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:29] Input Bruto Recebido: {"email":"admin@teste.com","password":"1123456"}
+[2026-03-09 19:06:29] Tentativa de login para: admin@teste.com
+[2026-03-09 19:06:29] Usuário encontrado. Verificando senha...
+[2026-03-09 19:06:29] ERRO: Senha incorreta.
+[2026-03-09 19:06:43] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:43] Método: OPTIONS
+[2026-03-09 19:06:43] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Accept] => */*
+    [Access-Control-Request-Method] => POST
+    [Access-Control-Request-Headers] => content-type
+    [Origin] => http://localhost:3000
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:43] Requisição OPTIONS recebida. Retornando 200 OK.
+[2026-03-09 19:06:43] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-09 19:06:43] Método: POST
+[2026-03-09 19:06:43] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Content-Length] => 47
+    [sec-ch-ua-platform] => "Windows"
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+    [sec-ch-ua] => "Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+    [Content-Type] => application/json
+    [sec-ch-ua-mobile] => ?0
+    [Accept] => */*
+    [Origin] => http://localhost:3000
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-09 19:06:43] Input Bruto Recebido: {"email":"admin@teste.com","password":"123456"}
+[2026-03-09 19:06:43] Tentativa de login para: admin@teste.com
+[2026-03-09 19:06:43] Usuário encontrado. Verificando senha...
+[2026-03-09 19:06:44] Senha correta. Gerando token: d1e1ae1dec...
+[2026-03-09 19:06:44] Login realizado com sucesso! ID: 1
