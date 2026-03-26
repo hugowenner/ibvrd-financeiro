@@ -1,5 +1,36 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { financeApi } from '../services/api'; 
+import { financeApi } from '../services/api';
+
+// 🔥 FUNÇÕES DE NORMALIZAÇÃO (CRÍTICAS)
+const normalizeDate = (dateString) => {
+    if (!dateString) return '';
+
+    // remove hora se existir
+    if (dateString.includes('T')) return dateString.split('T')[0];
+    if (dateString.includes(' ')) return dateString.split(' ')[0];
+
+    return dateString;
+};
+
+const parseValue = (value) => {
+    if (value === null || value === undefined) return 0;
+
+    if (typeof value === 'number') return value;
+
+    let str = String(value)
+        .replace(/[^\d,.-]/g, '')
+        .replace(',', '.');
+
+    const parsed = parseFloat(str);
+    return isNaN(parsed) ? 0 : parsed;
+};
+
+// 🔥 NORMALIZAÇÃO COMPLETA DO OBJETO
+const normalizeLancamento = (l) => ({
+    ...l,
+    data: normalizeDate(l.data),
+    valor: parseValue(l.valor),
+});
 
 export const FinanceContext = createContext();
 
@@ -8,39 +39,54 @@ export const FinanceProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
 
-    // Carregar dados inicial
+    // =========================
+    // FETCH INICIAL
+    // =========================
     useEffect(() => {
         const fetchLancamentos = async () => {
             if (!localStorage.getItem('token')) {
                 setLoading(false);
                 return;
             }
+
             try {
-                // CORREÇÃO: Usando método específico getLancamentos
                 const response = await financeApi.getLancamentos();
+
                 if (response.success && response.data) {
-                    setLancamentos(response.data);
+                    const dadosNormalizados = response.data.map(normalizeLancamento);
+                    setLancamentos(dadosNormalizados);
                 }
             } catch (error) {
-                console.error("Falha ao buscar lançamentos:", error);
+                console.error("Erro ao buscar lançamentos:", error);
                 notify('Erro ao carregar dados.', 'error');
             } finally {
                 setLoading(false);
             }
         };
-        
+
         fetchLancamentos();
     }, []);
 
-    // Adicionar
+    // =========================
+    // ADD
+    // =========================
     const addLancamento = async (lancamentoData) => {
         try {
-            // CORREÇÃO: Usando método específico addLancamento
-            const response = await financeApi.addLancamento(lancamentoData);
+            const payload = {
+                ...lancamentoData,
+                data: normalizeDate(lancamentoData.data),
+                valor: parseValue(lancamentoData.valor),
+            };
+
+            const response = await financeApi.addLancamento(payload);
+
             if (response.success && response.data) {
-                setLancamentos(prev => [...prev, response.data]);
+                const novo = normalizeLancamento(response.data);
+
+                setLancamentos(prev => [...prev, novo]);
                 notify('Lançamento adicionado!', 'success');
-                return response.data;
+
+                return novo;
             }
         } catch (error) {
             notify('Erro ao adicionar.', 'error');
@@ -48,17 +94,28 @@ export const FinanceProvider = ({ children }) => {
         }
     };
 
-    // Atualizar
+    // =========================
+    // UPDATE
+    // =========================
     const updateLancamento = async (id, lancamentoData) => {
         try {
-            // CORREÇÃO: Usando método específico updateLancamento
-            const response = await financeApi.updateLancamento(id, lancamentoData);
+            const payload = {
+                ...lancamentoData,
+                data: normalizeDate(lancamentoData.data),
+                valor: parseValue(lancamentoData.valor),
+            };
+
+            const response = await financeApi.updateLancamento(id, payload);
+
             if (response.success && response.data) {
-                setLancamentos(prev => 
-                    prev.map(l => l.id === id ? response.data : l)
+                const atualizado = normalizeLancamento(response.data);
+
+                setLancamentos(prev =>
+                    prev.map(l => l.id === id ? atualizado : l)
                 );
+
                 notify('Lançamento atualizado!', 'success');
-                return response.data;
+                return atualizado;
             }
         } catch (error) {
             notify('Erro ao atualizar.', 'error');
@@ -66,11 +123,13 @@ export const FinanceProvider = ({ children }) => {
         }
     };
 
-    // Excluir
+    // =========================
+    // DELETE
+    // =========================
     const deleteLancamento = async (id) => {
         try {
-            // CORREÇÃO: Usando método específico deleteLancamento
             await financeApi.deleteLancamento(id);
+
             setLancamentos(prev => prev.filter(l => l.id !== id));
             notify('Lançamento excluído!', 'success');
         } catch (error) {
@@ -79,21 +138,26 @@ export const FinanceProvider = ({ children }) => {
         }
     };
 
+    // =========================
+    // NOTIFICAÇÃO
+    // =========================
     const notify = (message, type = 'success') => {
         setNotification({ message, type });
         setTimeout(() => setNotification(null), 4000);
     };
 
     return (
-        <FinanceContext.Provider value={{ 
-            lancamentos, 
-            loading, 
-            addLancamento, 
-            updateLancamento, 
-            deleteLancamento, 
-            notification, 
-            notify 
-        }}>
+        <FinanceContext.Provider
+            value={{
+                lancamentos,
+                loading,
+                addLancamento,
+                updateLancamento,
+                deleteLancamento,
+                notification,
+                notify
+            }}
+        >
             {children}
         </FinanceContext.Provider>
     );

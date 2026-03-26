@@ -1,101 +1,146 @@
-// src/pages/Relatorios/Relatorios.js
 import React, { useContext, useState, useMemo } from 'react';
-import { FinanceContext } from '../../contexts/FinanceContext'; 
+import { FinanceContext } from '../../contexts/FinanceContext';
 import Card from '../../components/Card';
 import { formatCurrency } from '../../utils/formatters';
 import { FaPrint } from 'react-icons/fa';
+import { normalizeDateString } from '../../utils/date';
 
 const Relatorios = () => {
     const { lancamentos, loading } = useContext(FinanceContext);
     const [selectedMonth, setSelectedMonth] = useState('');
 
-    // Função Auxiliar Compartilhada
     const safeParseFloat = (value) => {
         if (!value) return 0;
-        let str = String(value);
-        str = str.replace(/[^\d.,-]/g, '');
-        str = str.replace(',', '.');
+        let str = String(value).replace(/[^\d.,-]/g, '').replace(',', '.');
         const parsed = parseFloat(str);
         return isNaN(parsed) ? 0 : parsed;
     };
 
+    // =========================
+    // FILTRO GLOBAL
+    // =========================
+    const lancamentosFiltrados = useMemo(() => {
+        return lancamentos.filter(l => {
+            if (!l?.data) return false;
+
+            const data = normalizeDateString(l.data);
+
+            if (selectedMonth && !data.startsWith(selectedMonth)) {
+                return false;
+            }
+
+            return true;
+        });
+    }, [lancamentos, selectedMonth]);
+
+    // =========================
+    // TOTAIS GERAIS (NOVO)
+    // =========================
+    const totalEntradas = lancamentosFiltrados
+        .filter(l => l.tipo === 'Entrada')
+        .reduce((acc, l) => acc + safeParseFloat(l.valor), 0);
+
+    const totalSaidas = lancamentosFiltrados
+        .filter(l => l.tipo !== 'Entrada')
+        .reduce((acc, l) => acc + safeParseFloat(l.valor), 0);
+
+    const saldoTotal = totalEntradas - totalSaidas;
+
+    // =========================
+    // MESES DISPONÍVEIS
+    // =========================
     const mesesDisponiveis = useMemo(() => {
         const meses = new Set();
+
         lancamentos.forEach(l => {
-            if (l) {
-                const mesAno = l.data.substring(0, 7); 
-                meses.add(mesAno);
-            }
+            if (!l?.data) return;
+
+            const data = normalizeDateString(l.data);
+            meses.add(data.substring(0, 7));
         });
+
         return Array.from(meses).sort((a, b) => b.localeCompare(a));
     }, [lancamentos]);
 
-    const lancamentosFiltrados = useMemo(() => {
-        if (!selectedMonth) {
-            return lancamentos; 
-        }
-        return lancamentos.filter(l => l && l.data.startsWith(selectedMonth));
-    }, [lancamentos, selectedMonth]);
-
-    // CORREÇÃO DO CÁLCULO MENSAL
+    // =========================
+    // RELATÓRIO MENSAL
+    // =========================
     const relatorioMensal = useMemo(() => {
-        const agrupado = lancamentosFiltrados.reduce((acc, lancamento) => {
-            if (!lancamento) return acc;
+        const agrupado = {};
 
-            const mesAno = lancamento.data.substring(0, 7); 
-            if (!acc[mesAno]) {
-                acc[mesAno] = { entradas: 0, saidas: 0 };
+        lancamentosFiltrados.forEach(l => {
+            if (!l?.data) return;
+
+            const data = normalizeDateString(l.data);
+            const mesAno = data.substring(0, 7);
+
+            if (!agrupado[mesAno]) {
+                agrupado[mesAno] = { entradas: 0, saidas: 0 };
             }
-            
-            // CORREÇÃO: Agora soma números, não strings
-            const valor = safeParseFloat(lancamento.valor);
 
-            if (lancamento.tipo === 'Entrada') {
-                acc[mesAno].entradas += valor;
+            const valor = safeParseFloat(l.valor);
+
+            if (l.tipo === 'Entrada') {
+                agrupado[mesAno].entradas += valor;
             } else {
-                acc[mesAno].saidas += valor;
+                agrupado[mesAno].saidas += valor;
             }
-            return acc;
-        }, {});
+        });
 
-        return Object.entries(agrupado).map(([mesAno, valores]) => ({
-            mes: new Date(mesAno + '-01').toLocaleString('pt-BR', { month: 'long', year: 'numeric' }),
-            original: mesAno, 
-            ...valores,
-            saldo: valores.entradas - valores.saidas
-        })).sort((a, b) => b.original.localeCompare(a.original));
+        return Object.entries(agrupado).map(([mesAno, valores]) => {
+            const [year, month] = mesAno.split('-').map(Number);
+
+            const date = new Date(Date.UTC(year, month - 1));
+
+            return {
+                mes: date.toLocaleString('pt-BR', {
+                    month: 'long',
+                    year: 'numeric',
+                    timeZone: 'UTC'
+                }),
+                original: mesAno,
+                ...valores,
+                saldo: valores.entradas - valores.saidas
+            };
+        }).sort((a, b) => b.original.localeCompare(a.original));
+
     }, [lancamentosFiltrados]);
 
-    // CORREÇÃO DO CÁLCULO POR CATEGORIA
+    // =========================
+    // CATEGORIAS
+    // =========================
     const relatorioPorCategoria = useMemo(() => {
-        const agrupado = lancamentosFiltrados.reduce((acc, lancamento) => {
-            if (!lancamento) return acc;
+        const agrupado = {};
 
-            if (!acc[lancamento.categoria]) {
-                acc[lancamento.categoria] = 0;
+        lancamentosFiltrados.forEach(l => {
+            if (!l?.categoria) return;
+
+            if (!agrupado[l.categoria]) {
+                agrupado[l.categoria] = 0;
             }
-            
-            // CORREÇÃO: Soma numérica segura
-            acc[lancamento.categoria] += safeParseFloat(lancamento.valor);
-            return acc;
-        }, {});
-        
-        return Object.entries(agrupado).map(([categoria, total]) => ({
-            categoria,
-            total
-        })).sort((a, b) => b.total - a.total);
+
+            agrupado[l.categoria] += safeParseFloat(l.valor);
+        });
+
+        return Object.entries(agrupado)
+            .map(([categoria, total]) => ({ categoria, total }))
+            .sort((a, b) => b.total - a.total);
+
     }, [lancamentosFiltrados]);
 
-    const handlePrint = () => {
-        window.print();
-    };
+    const handlePrint = () => window.print();
 
     const formatMonthLabel = (dateString) => {
         try {
-            const [year, month] = dateString.split('-');
-            const date = new Date(year, month - 1); 
-            return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-        } catch (e) {
+            const [year, month] = dateString.split('-').map(Number);
+            const date = new Date(Date.UTC(year, month - 1));
+
+            return date.toLocaleString('pt-BR', {
+                month: 'long',
+                year: 'numeric',
+                timeZone: 'UTC'
+            });
+        } catch {
             return dateString;
         }
     };
@@ -110,107 +155,82 @@ const Relatorios = () => {
 
     return (
         <div className="animate-fade-in">
-            <div className="mb-6 md:mb-8 pb-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-2xl md:text-3xl font-serif text-gray-900 font-semibold">Relatórios Financeiros</h2>
-                    <p className="text-gray-500 mt-2 font-sans font-light text-sm md:text-lg">Análise detalhada por período e categoria.</p>
-                </div>
+            <div className="mb-6 pb-4 border-b border-gray-100 flex justify-between items-center">
+                <h2 className="text-2xl font-serif font-semibold">Relatórios Financeiros</h2>
 
-                <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                    <div className="w-full md:w-64">
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-sans">
-                            Filtrar por Mês
-                        </label>
-                        <select 
-                            value={selectedMonth} 
-                            onChange={(e) => setSelectedMonth(e.target.value)}
-                            className="block w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition duration-200 font-sans text-sm shadow-sm cursor-pointer hover:border-amber-300"
-                        >
-                            <option value="">Todos os meses</option>
-                            {mesesDisponiveis.map(mes => (
-                                <option key={mes} value={mes}>
-                                    {formatMonthLabel(mes)}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                <div className="flex gap-4">
+                    <select
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        className="px-4 py-2 border rounded-xl"
+                    >
+                        <option value="">Todos</option>
+                        {mesesDisponiveis.map(m => (
+                            <option key={m} value={m}>
+                                {formatMonthLabel(m)}
+                            </option>
+                        ))}
+                    </select>
 
-                    <div className="w-full md:w-auto">
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-sans">
-                            Ações
-                        </label>
-                        <button 
-                            onClick={handlePrint}
-                            className="w-full md:w-auto h-[42px] px-6 bg-amber-600 text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-md hover:bg-amber-700 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-                        >
-                            <FaPrint />
-                            Imprimir Relatório
-                        </button>
-                    </div>
+                    <button onClick={handlePrint} className="bg-amber-600 text-white px-4 py-2 rounded-xl flex items-center gap-2">
+                        <FaPrint /> Imprimir
+                    </button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                <Card title={selectedMonth ? `Resumo de ${formatMonthLabel(selectedMonth)}` : "Resumo Mensal"} className="border-t-4 border-t-amber-600">
-                    {relatorioMensal.length === 0 ? (
-                        <div className="text-center py-8 text-gray-400 text-sm italic">
-                            Nenhum registro encontrado para o período selecionado.
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto -mx-4 md:mx-0">
-                            <div className="px-4 md:px-0">
-                                <table className="w-full text-sm text-left min-w-[500px]">
-                                    <thead className="text-[10px] md:text-xs text-gray-400 uppercase bg-gray-50/50 border-b border-gray-100">
-                                        <tr>
-                                            <th className="px-3 md:px-4 py-3 font-bold tracking-widest font-sans">Mês</th>
-                                            <th className="px-3 md:px-4 py-3 font-bold tracking-widest text-right font-sans">Entradas</th>
-                                            <th className="px-3 md:px-4 py-3 font-bold tracking-widest text-right font-sans">Saídas</th>
-                                            <th className="px-3 md:px-4 py-3 font-bold tracking-widest text-right font-sans">Saldo</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {relatorioMensal.map((rel, index) => (
-                                            <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-3 md:px-4 py-3 font-medium text-gray-700 capitalize font-serif">{rel.mes}</td>
-                                                <td className="px-3 md:px-4 py-3 text-right text-green-700 font-mono">{formatCurrency(rel.entradas)}</td>
-                                                <td className="px-3 md:px-4 py-3 text-right text-red-700 font-mono">{formatCurrency(rel.saidas)}</td>
-                                                <td className={`px-3 md:px-4 py-3 text-right font-bold font-serif ${rel.saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>{formatCurrency(rel.saldo)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+            {/* 🔥 NOVO: CARDS DE RESUMO */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+                <Card title="Entradas Totais" value={formatCurrency(totalEntradas)} valueColor="text-positivo" />
+                <Card title="Saídas Totais" value={formatCurrency(totalSaidas)} valueColor="text-negativo" />
+                <Card title="Saldo Total" value={formatCurrency(saldoTotal)} />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* RESUMO MENSAL */}
+                <Card title="Resumo Mensal">
+                    {relatorioMensal.map((rel, i) => {
+                        const isCurrent = rel.original === new Date().toISOString().slice(0, 7);
+
+                        return (
+                            <div key={i} className={`border-b py-3 space-y-1 ${isCurrent ? 'bg-amber-50 rounded-xl p-3' : ''}`}>
+                                
+                                <div className="font-semibold text-gray-800 capitalize">
+                                    {rel.mes}
+                                </div>
+
+                                <div className="flex justify-between text-green-700 text-sm">
+                                    <span>Entradas</span>
+                                    <span>{formatCurrency(rel.entradas)}</span>
+                                </div>
+
+                                <div className="flex justify-between text-red-600 text-sm">
+                                    <span>Saídas</span>
+                                    <span>{formatCurrency(rel.saidas)}</span>
+                                </div>
+
+                                <div className="flex justify-between font-bold pt-1 border-t">
+                                    <span>Saldo</span>
+                                    <span className={rel.saldo >= 0 ? 'text-green-700' : 'text-red-600'}>
+                                        {formatCurrency(rel.saldo)}
+                                    </span>
+                                </div>
+
                             </div>
-                        </div>
-                    )}
+                        );
+                    })}
                 </Card>
 
-                <Card title={selectedMonth ? "Categorias (Filtrado)" : "Total por Categoria"} className="border-t-4 border-t-amber-600">
-                    {relatorioPorCategoria.length === 0 ? (
-                        <div className="text-center py-8 text-gray-400 text-sm italic">
-                            Nenhum registro encontrado para o período selecionado.
+                {/* CATEGORIAS */}
+                <Card title="Categorias">
+                    {relatorioPorCategoria.map((rel, i) => (
+                        <div key={i} className="flex justify-between py-2 border-b">
+                            <span className="text-gray-700">{rel.categoria}</span>
+                            <span className="font-semibold text-gray-900">
+                                {formatCurrency(rel.total)}
+                            </span>
                         </div>
-                    ) : (
-                        <div className="overflow-x-auto -mx-4 md:mx-0">
-                            <div className="px-4 md:px-0">
-                                <table className="w-full text-sm text-left min-w-[400px]">
-                                    <thead className="text-[10px] md:text-xs text-gray-400 uppercase bg-gray-50/50 border-b border-gray-100">
-                                        <tr>
-                                            <th className="px-3 md:px-4 py-3 font-bold tracking-widest font-sans">Categoria</th>
-                                            <th className="px-3 md:px-4 py-3 font-bold tracking-widest text-right font-sans">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {relatorioPorCategoria.map((rel, index) => (
-                                            <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-3 md:px-4 py-3 font-medium text-gray-700 font-serif">{rel.categoria}</td>
-                                                <td className="px-3 md:px-4 py-3 text-right font-bold text-gray-900 font-mono">{formatCurrency(rel.total)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
+                    ))}
                 </Card>
             </div>
         </div>

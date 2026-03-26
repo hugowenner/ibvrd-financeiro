@@ -639,3 +639,95 @@
 [2026-03-09 19:06:43] Usuário encontrado. Verificando senha...
 [2026-03-09 19:06:44] Senha correta. Gerando token: d1e1ae1dec...
 [2026-03-09 19:06:44] Login realizado com sucesso! ID: 1
+[2026-03-26 16:16:08] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-26 16:16:08] Método: OPTIONS
+[2026-03-26 16:16:08] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Accept] => */*
+    [Access-Control-Request-Method] => POST
+    [Access-Control-Request-Headers] => content-type
+    [Origin] => http://localhost:3000
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-26 16:16:08] Requisição OPTIONS recebida. Retornando 200 OK.
+[2026-03-26 16:16:08] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-26 16:16:08] Método: POST
+[2026-03-26 16:16:08] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Content-Length] => 50
+    [sec-ch-ua-platform] => "Windows"
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+    [sec-ch-ua] => "Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"
+    [Content-Type] => application/json
+    [sec-ch-ua-mobile] => ?0
+    [Accept] => */*
+    [Origin] => http://localhost:3000
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-26 16:16:08] Input Bruto Recebido: {"email":"admin@ibvrd.com.br","password":"123456"}
+[2026-03-26 16:16:08] Tentativa de login para: admin@ibvrd.com.br
+[2026-03-26 16:16:08] ERRO: Usuário não encontrado.
+[2026-03-26 16:16:13] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-26 16:16:13] Método: OPTIONS
+[2026-03-26 16:16:13] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Accept] => */*
+    [Access-Control-Request-Method] => POST
+    [Access-Control-Request-Headers] => content-type
+    [Origin] => http://localhost:3000
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-26 16:16:13] Requisição OPTIONS recebida. Retornando 200 OK.
+[2026-03-26 16:16:13] NOVA REQUISIÇÃO RECEBIDA
+[2026-03-26 16:16:13] Método: POST
+[2026-03-26 16:16:13] Headers: Array
+(
+    [Host] => localhost:8000
+    [Connection] => keep-alive
+    [Content-Length] => 47
+    [sec-ch-ua-platform] => "Windows"
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+    [sec-ch-ua] => "Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"
+    [Content-Type] => application/json
+    [sec-ch-ua-mobile] => ?0
+    [Accept] => */*
+    [Origin] => http://localhost:3000
+    [Sec-Fetch-Site] => same-site
+    [Sec-Fetch-Mode] => cors
+    [Sec-Fetch-Dest] => empty
+    [Referer] => http://localhost:3000/
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,it;q=0.6
+)
+
+[2026-03-26 16:16:13] Input Bruto Recebido: {"email":"admin@teste.com","password":"123456"}
+[2026-03-26 16:16:13] Tentativa de login para: admin@teste.com
+[2026-03-26 16:16:13] Usuário encontrado. Verificando senha...
+[2026-03-26 16:16:13] Senha correta. Gerando token: fe7554d75f...
+[2026-03-26 16:16:13] Login realizado com sucesso! ID: 1

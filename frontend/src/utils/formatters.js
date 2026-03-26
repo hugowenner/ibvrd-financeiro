@@ -8,8 +8,16 @@ export const formatCurrency = (value) => {
 export const formatDate = (dateString) => {
     if (!dateString) return '';
 
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
+    // normaliza primeiro
+    const clean = dateString.includes('T')
+        ? dateString.split('T')[0]
+        : dateString;
 
-    return date.toLocaleDateString('pt-BR');
+    const [year, month, day] = clean.split('-').map(Number);
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    return date.toLocaleDateString('pt-BR', {
+        timeZone: 'UTC'
+    });
 };
