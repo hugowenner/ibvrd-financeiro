@@ -250,8 +250,9 @@ const Relatorios = () => {
             </div>
 
             {/* 🔥 TABELA DETALHADA (APENAS MODO MENSAL) */}
+            <div className="print-break" />
             {isMonthly && (
-                <div className="mt-6 bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="mt-6 bg-white rounded-xl shadow-sm border overflow-visible print:overflow-visible">
                     
                     <div className="p-4 border-b">
                         <h3 className="text-lg font-semibold">
@@ -259,7 +260,7 @@ const Relatorios = () => {
                         </h3>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto print:overflow-visible">
                         <table className="min-w-full text-sm">
                             
                             <thead className="bg-gray-50 text-gray-600 uppercase text-xs">

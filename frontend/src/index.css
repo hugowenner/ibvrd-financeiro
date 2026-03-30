@@ -27,3 +27,60 @@ body {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@media print {
+
+  body {
+    background: white !important;
+  }
+
+  /* 🔥 ESCONDER UI */
+  button,
+  select {
+    display: none !important;
+  }
+
+  /* 🔥 REMOVER ESTILO VISUAL */
+  .shadow-sm,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  .rounded-xl,
+  .rounded-2xl {
+    border-radius: 0 !important;
+  }
+
+  /* 🔥 CRÍTICO: QUEBRAR GRID */
+  .grid {
+    display: block !important;
+  }
+
+  /* 🔥 CRÍTICO: REMOVER LIMITES */
+  * {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  html, body {
+    height: auto !important;
+  }
+
+  /* 🔥 TABELA */
+  table {
+    width: 100% !important;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* 🔥 QUEBRA DE PÁGINA REAL */
+  .print-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+}
