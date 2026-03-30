@@ -15,12 +15,16 @@ const getLocalDateString = () => {
 };
 
 // --- COMPONENTE COMBOBOX (Mantido Igual) ---
+
 const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [inputValue, setInputValue] = useState(value || '');
+    const [activeIndex, setActiveIndex] = useState(-1);
     const containerRef = useRef(null);
 
-    useEffect(() => { setInputValue(value || ''); }, [value]);
+    useEffect(() => { 
+        setInputValue(value || ''); 
+    }, [value]);
 
     const filteredSuggestions = suggestions.filter(suggestion =>
         suggestion.toLowerCase().includes(inputValue.toLowerCase())
@@ -28,7 +32,10 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (containerRef.current && !containerRef.current.contains(event.target)) setIsOpen(false);
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+                setActiveIndex(-1);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -39,12 +46,50 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
         setInputValue(val);
         onChange({ target: { name, value: val } });
         setIsOpen(true);
+        setActiveIndex(-1);
     };
 
     const handleSelectOption = (suggestion) => {
         setInputValue(suggestion);
         onChange({ target: { name, value: suggestion } });
         setIsOpen(false);
+        setActiveIndex(-1);
+    };
+
+    // 🔥 TECLADO AQUI
+    const handleKeyDown = (e) => {
+        if (!isOpen) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                setActiveIndex(prev =>
+                    prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+                );
+                break;
+
+            case 'ArrowUp':
+                e.preventDefault();
+                setActiveIndex(prev =>
+                    prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+                );
+                break;
+
+            case 'Enter':
+                e.preventDefault();
+                if (activeIndex >= 0 && filteredSuggestions[activeIndex]) {
+                    handleSelectOption(filteredSuggestions[activeIndex]);
+                }
+                break;
+
+            case 'Escape':
+                setIsOpen(false);
+                setActiveIndex(-1);
+                break;
+
+            default:
+                break;
+        }
     };
 
     return (
@@ -55,6 +100,7 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
                     name={name}
                     value={inputValue}
                     onChange={handleInputChange}
+                    onKeyDown={handleKeyDown} // 🔥 IMPORTANTE
                     onFocus={() => setIsOpen(true)}
                     placeholder="Selecione ou digite"
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-amber-600 focus:bg-white focus:border-transparent outline-none transition-all font-sans shadow-sm"
@@ -65,12 +111,23 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
                     {isOpen ? <FaChevronDown className="text-sm text-amber-500" /> : <FaSearch className="text-sm" />}
                 </div>
             </div>
+
             {isOpen && filteredSuggestions.length > 0 && (
                 <ul className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto z-30 animate-fade-in-up">
                     {filteredSuggestions.map((suggestion, index) => (
-                        <li key={index} onClick={() => handleSelectOption(suggestion)} className={`px-4 py-3 cursor-pointer text-sm font-sans flex items-center justify-between transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-amber-50 hover:text-amber-700`}>
+                        <li
+                            key={index}
+                            onClick={() => handleSelectOption(suggestion)}
+                            className={`
+                                px-4 py-3 cursor-pointer text-sm font-sans flex items-center justify-between transition-colors
+                                ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                                ${activeIndex === index ? 'bg-blue-600 text-white' : 'hover:bg-amber-50 hover:text-amber-700'}
+                            `}
+                        >
                             <span>{suggestion}</span>
-                            {inputValue.toLowerCase() === suggestion.toLowerCase() && <FaCheckCircle className="text-amber-600 text-xs" />}
+                            {inputValue.toLowerCase() === suggestion.toLowerCase() && (
+                                <FaCheckCircle className="text-amber-600 text-xs" />
+                            )}
                         </li>
                     ))}
                 </ul>

@@ -1,0 +1,19 @@
+Options -MultiViews
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /financeiro/
+
+  # 🔥 NÃO REESCREVER assets (CRÍTICO)
+  RewriteCond %{REQUEST_URI} ^/financeiro/static/ [OR]
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf|map)$ [NC]
+  RewriteRule ^ - [L]
+
+  # 🔥 NÃO REESCREVER arquivos reais
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # SPA fallback
+  RewriteRule ^ /financeiro/index.html [L]
+</IfModule>
