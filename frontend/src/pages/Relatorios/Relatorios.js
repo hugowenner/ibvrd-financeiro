@@ -127,7 +127,7 @@ const Relatorios = () => {
             .sort((a, b) => b.total - a.total);
 
     }, [lancamentosFiltrados]);
-
+    const isMonthly = !!selectedMonth;
     const handlePrint = () => window.print();
 
     const formatMonthLabel = (dateString) => {
@@ -233,6 +233,74 @@ const Relatorios = () => {
                     ))}
                 </Card>
             </div>
+
+            {/* 🔥 TABELA DETALHADA (APENAS MODO MENSAL) */}
+            {isMonthly && (
+                <div className="mt-6 bg-white rounded-xl shadow-sm border overflow-hidden">
+                    
+                    <div className="p-4 border-b">
+                        <h3 className="text-lg font-semibold">
+                            Lançamentos do mês
+                        </h3>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm">
+                            
+                            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+                                <tr>
+                                    <th className="px-4 py-3 text-left">Data</th>
+                                    <th className="px-4 py-3 text-left">Descrição</th>
+                                    <th className="px-4 py-3 text-left">Categoria</th>
+                                    <th className="px-4 py-3 text-left">Tipo</th>
+                                    <th className="px-4 py-3 text-right">Valor</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {lancamentosFiltrados.map((l, index) => {
+                                    const valor = safeParseFloat(l.valor);
+
+                                    return (
+                                        <tr key={index} className="border-b hover:bg-gray-50">
+                                            
+                                            <td className="px-4 py-3 text-gray-700">
+                                                {normalizeDateString(l.data)}
+                                            </td>
+
+                                            <td className="px-4 py-3">
+                                                {l.descricao || '-'}
+                                            </td>
+
+                                            <td className="px-4 py-3">
+                                                {l.categoria || '-'}
+                                            </td>
+
+                                            <td className={`px-4 py-3 font-medium ${
+                                                l.tipo === 'Entrada'
+                                                    ? 'text-green-600'
+                                                    : 'text-red-600'
+                                            }`}>
+                                                {l.tipo}
+                                            </td>
+
+                                            <td className={`px-4 py-3 text-right font-semibold ${
+                                                l.tipo === 'Entrada'
+                                                    ? 'text-green-700'
+                                                    : 'text-red-700'
+                                            }`}>
+                                                {formatCurrency(valor)}
+                                            </td>
+
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
