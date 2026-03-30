@@ -113,25 +113,33 @@ const CategoryAutocomplete = ({ value, onChange, suggestions, name }) => {
             </div>
 
             {isOpen && filteredSuggestions.length > 0 && (
-                <ul className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto z-30 animate-fade-in-up">
-                    {filteredSuggestions.map((suggestion, index) => (
-                        <li
-                            key={index}
-                            onClick={() => handleSelectOption(suggestion)}
-                            className={`
-                                px-4 py-3 cursor-pointer text-sm font-sans flex items-center justify-between transition-colors
-                                ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                                ${activeIndex === index ? 'bg-blue-600 text-white' : 'hover:bg-amber-50 hover:text-amber-700'}
-                            `}
-                        >
-                            <span>{suggestion}</span>
-                            {inputValue.toLowerCase() === suggestion.toLowerCase() && (
-                                <FaCheckCircle className="text-amber-600 text-xs" />
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            )}
+    <ul className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto z-30 animate-fade-in-up">
+        {filteredSuggestions.map((suggestion, index) => (
+            <li
+                key={index}
+                onClick={() => handleSelectOption(suggestion)}
+                className={`
+                    px-4 py-3 cursor-pointer text-sm font-sans flex items-center justify-between transition-colors
+
+                    ${activeIndex === index
+                        ? 'bg-blue-600 text-white'
+                        : index % 2 === 0
+                            ? 'bg-white'
+                            : 'bg-gray-50'
+                    }
+
+                    ${activeIndex !== index && 'hover:bg-amber-50 hover:text-amber-700'}
+                `}
+            >
+                <span>{suggestion}</span>
+
+                {inputValue.toLowerCase() === suggestion.toLowerCase() && (
+                    <FaCheckCircle className="text-amber-600 text-xs" />
+                )}
+            </li>
+        ))}
+    </ul>
+)}
         </div>
     );
 };

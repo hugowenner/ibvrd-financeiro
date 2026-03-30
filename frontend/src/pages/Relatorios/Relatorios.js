@@ -127,6 +127,21 @@ const Relatorios = () => {
             .sort((a, b) => b.total - a.total);
 
     }, [lancamentosFiltrados]);
+
+    // =========================
+    // FUNÇÃO DE FORMATAÇÃO DE DATA (NOVO)
+    // =========================
+    const formatDisplayDate = (dateString) => {
+        if (!dateString) return '-';
+        try {
+            const normalized = normalizeDateString(dateString);
+            const [year, month, day] = normalized.split('-');
+            return `${day}/${month}/${year}`;
+        } catch (e) {
+            return dateString;
+        }
+    };
+
     const isMonthly = !!selectedMonth;
     const handlePrint = () => window.print();
 
@@ -265,7 +280,8 @@ const Relatorios = () => {
                                         <tr key={index} className="border-b hover:bg-gray-50">
                                             
                                             <td className="px-4 py-3 text-gray-700">
-                                                {normalizeDateString(l.data)}
+                                                {/* MUDANÇA APLICADA AQUI */}
+                                                {formatDisplayDate(l.data)}
                                             </td>
 
                                             <td className="px-4 py-3">
